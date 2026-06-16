@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as AstrologerSlugRouteImport } from './routes/astrologer.$slug'
@@ -16,15 +17,20 @@ import { Route as AdminAstrologersRouteImport } from './routes/admin.astrologers
 import { Route as ApiPublicConsultRouteImport } from './routes/api/public/consult'
 import { Route as AdminAstrologersIdRouteImport } from './routes/admin.astrologers.$id'
 
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminIndexRoute = AdminIndexRouteImport.update({
-  id: '/admin/',
-  path: '/admin/',
-  getParentRoute: () => rootRouteImport,
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminRoute,
 } as any)
 const AstrologerSlugRoute = AstrologerSlugRouteImport.update({
   id: '/astrologer/$slug',
@@ -32,9 +38,9 @@ const AstrologerSlugRoute = AstrologerSlugRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminAstrologersRoute = AdminAstrologersRouteImport.update({
-  id: '/admin/astrologers',
-  path: '/admin/astrologers',
-  getParentRoute: () => rootRouteImport,
+  id: '/astrologers',
+  path: '/astrologers',
+  getParentRoute: () => AdminRoute,
 } as any)
 const ApiPublicConsultRoute = ApiPublicConsultRouteImport.update({
   id: '/api/public/consult',
@@ -49,6 +55,7 @@ const AdminAstrologersIdRoute = AdminAstrologersIdRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRouteWithChildren
   '/admin/astrologers': typeof AdminAstrologersRouteWithChildren
   '/astrologer/$slug': typeof AstrologerSlugRoute
   '/admin/': typeof AdminIndexRoute
@@ -66,6 +73,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/admin': typeof AdminRouteWithChildren
   '/admin/astrologers': typeof AdminAstrologersRouteWithChildren
   '/astrologer/$slug': typeof AstrologerSlugRoute
   '/admin/': typeof AdminIndexRoute
@@ -76,6 +84,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/admin'
     | '/admin/astrologers'
     | '/astrologer/$slug'
     | '/admin/'
@@ -92,6 +101,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/admin'
     | '/admin/astrologers'
     | '/astrologer/$slug'
     | '/admin/'
@@ -101,14 +111,20 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  AdminAstrologersRoute: typeof AdminAstrologersRouteWithChildren
+  AdminRoute: typeof AdminRouteWithChildren
   AstrologerSlugRoute: typeof AstrologerSlugRoute
-  AdminIndexRoute: typeof AdminIndexRoute
   ApiPublicConsultRoute: typeof ApiPublicConsultRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -118,10 +134,10 @@ declare module '@tanstack/react-router' {
     }
     '/admin/': {
       id: '/admin/'
-      path: '/admin'
+      path: '/'
       fullPath: '/admin/'
       preLoaderRoute: typeof AdminIndexRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof AdminRoute
     }
     '/astrologer/$slug': {
       id: '/astrologer/$slug'
@@ -132,10 +148,10 @@ declare module '@tanstack/react-router' {
     }
     '/admin/astrologers': {
       id: '/admin/astrologers'
-      path: '/admin/astrologers'
+      path: '/astrologers'
       fullPath: '/admin/astrologers'
       preLoaderRoute: typeof AdminAstrologersRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof AdminRoute
     }
     '/api/public/consult': {
       id: '/api/public/consult'
@@ -165,11 +181,22 @@ const AdminAstrologersRouteChildren: AdminAstrologersRouteChildren = {
 const AdminAstrologersRouteWithChildren =
   AdminAstrologersRoute._addFileChildren(AdminAstrologersRouteChildren)
 
+interface AdminRouteChildren {
+  AdminAstrologersRoute: typeof AdminAstrologersRouteWithChildren
+  AdminIndexRoute: typeof AdminIndexRoute
+}
+
+const AdminRouteChildren: AdminRouteChildren = {
+  AdminAstrologersRoute: AdminAstrologersRouteWithChildren,
+  AdminIndexRoute: AdminIndexRoute,
+}
+
+const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  AdminAstrologersRoute: AdminAstrologersRouteWithChildren,
+  AdminRoute: AdminRouteWithChildren,
   AstrologerSlugRoute: AstrologerSlugRoute,
-  AdminIndexRoute: AdminIndexRoute,
   ApiPublicConsultRoute: ApiPublicConsultRoute,
 }
 export const routeTree = rootRouteImport
