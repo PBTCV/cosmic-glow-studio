@@ -69,7 +69,7 @@ export const listAstrologersPublic = createServerFn({ method: "GET" }).handler(a
     from astrologers
     where is_active = true
     order by display_order asc, created_at desc
-  `) as Array<Record<string, unknown>>;
+  `) as any[];
   return { rows };
 });
 
@@ -80,7 +80,7 @@ export const getAstrologerBySlug = createServerFn({ method: "GET" })
     const sql = getSql();
     const rows = (await sql`
       select * from astrologers where slug = ${data.slug} and is_active = true limit 1
-    `) as Array<Record<string, unknown>>;
+    `) as any[];
     if (!rows.length) return { profile: null, services: [], availability: [] };
     const profile = rows[0];
     const services = (await sql`
@@ -88,13 +88,13 @@ export const getAstrologerBySlug = createServerFn({ method: "GET" })
       from astrologer_services
       where astrologer_id = ${profile.id as string} and is_active = true
       order by display_order asc, created_at asc
-    `) as Array<Record<string, unknown>>;
+    `) as any[];
     const availability = (await sql`
       select id, timezone, day_of_week, start_time, end_time
       from astrologer_availability
       where astrologer_id = ${profile.id as string}
       order by day_of_week asc, start_time asc
-    `) as Array<Record<string, unknown>>;
+    `) as any[];
     return { profile, services, availability };
   });
 
@@ -113,7 +113,7 @@ export const listAstrologersAdmin = createServerFn({ method: "POST" })
              specialties, is_active, is_featured, display_order, updated_at
       from astrologers
       order by display_order asc, created_at desc
-    `) as Array<Record<string, unknown>>;
+    `) as any[];
     return { rows };
   });
 
@@ -126,7 +126,7 @@ export const getAstrologerAdmin = createServerFn({ method: "POST" })
     const { getSql } = await import("./neon.server");
     const sql = getSql();
     const rows = (await sql`select * from astrologers where id = ${data.id} limit 1`) as Array<
-      Record<string, unknown>
+      any
     >;
     if (!rows.length) throw new Error("Not found");
     const services = (await sql`
@@ -135,13 +135,13 @@ export const getAstrologerAdmin = createServerFn({ method: "POST" })
       from astrologer_services
       where astrologer_id = ${data.id}
       order by display_order asc, created_at asc
-    `) as Array<Record<string, unknown>>;
+    `) as any[];
     const availability = (await sql`
       select id, timezone, day_of_week, start_time, end_time
       from astrologer_availability
       where astrologer_id = ${data.id}
       order by day_of_week asc, start_time asc
-    `) as Array<Record<string, unknown>>;
+    `) as any[];
     return { profile: rows[0], services, availability };
   });
 
