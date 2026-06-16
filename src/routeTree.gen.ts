@@ -32,9 +32,9 @@ const AstrologerSlugRoute = AstrologerSlugRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminAstrologersRoute = AdminAstrologersRouteImport.update({
-  id: '/astrologers',
-  path: '/astrologers',
-  getParentRoute: () => AdminRoute,
+  id: '/admin/astrologers',
+  path: '/admin/astrologers',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const ApiPublicConsultRoute = ApiPublicConsultRouteImport.update({
   id: '/api/public/consult',
@@ -101,6 +101,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AdminAstrologersRoute: typeof AdminAstrologersRouteWithChildren
   AstrologerSlugRoute: typeof AstrologerSlugRoute
   AdminIndexRoute: typeof AdminIndexRoute
   ApiPublicConsultRoute: typeof ApiPublicConsultRoute
@@ -131,10 +132,10 @@ declare module '@tanstack/react-router' {
     }
     '/admin/astrologers': {
       id: '/admin/astrologers'
-      path: '/astrologers'
+      path: '/admin/astrologers'
       fullPath: '/admin/astrologers'
       preLoaderRoute: typeof AdminAstrologersRouteImport
-      parentRoute: typeof AdminRoute
+      parentRoute: typeof rootRouteImport
     }
     '/api/public/consult': {
       id: '/api/public/consult'
@@ -153,8 +154,20 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AdminAstrologersRouteChildren {
+  AdminAstrologersIdRoute: typeof AdminAstrologersIdRoute
+}
+
+const AdminAstrologersRouteChildren: AdminAstrologersRouteChildren = {
+  AdminAstrologersIdRoute: AdminAstrologersIdRoute,
+}
+
+const AdminAstrologersRouteWithChildren =
+  AdminAstrologersRoute._addFileChildren(AdminAstrologersRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AdminAstrologersRoute: AdminAstrologersRouteWithChildren,
   AstrologerSlugRoute: AstrologerSlugRoute,
   AdminIndexRoute: AdminIndexRoute,
   ApiPublicConsultRoute: ApiPublicConsultRoute,
@@ -162,13 +175,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
