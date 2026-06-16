@@ -20,12 +20,16 @@ function nullify<T extends string | undefined>(v: T): string | null {
   return t.length ? t : null;
 }
 
-function requireAdmin() {
-  const token = getRequestHeader("x-admin-token");
+function requireAdmin(inputToken?: string) {
   const expected = process.env.ADMIN_API_TOKEN;
   if (!expected) throw new Error("ADMIN_API_TOKEN not configured");
-  if (token !== expected) throw new Error("Unauthorized");
+  const token = inputToken ?? getRequestHeader("x-admin-token");
+  if (!token || token.length !== expected.length) throw new Error("Unauthorized");
+  let diff = 0;
+  for (let i = 0; i < token.length; i++) diff |= token.charCodeAt(i) ^ expected.charCodeAt(i);
+  if (diff !== 0) throw new Error("Unauthorized");
 }
+
 
 export const submitConsultation = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => SubmitSchema.parse(input))
@@ -70,12 +74,14 @@ const ListSchema = z.object({
   status: z.string().optional(),
   limit: z.number().int().min(1).max(200).default(50),
   offset: z.number().int().min(0).default(0),
+  adminToken: z.string().optional(),
 });
 
 export const listConsultations = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => ListSchema.parse(input ?? {}))
   .handler(async ({ data }) => {
-    requireAdmin();
+    requireAdmin(data.adminToken);
+
     const { getSql } = await import("./neon.server");
     const sql = getSql();
     const rows = data.status
@@ -105,12 +111,14 @@ const UpdateStatusSchema = z.object({
   id: z.string().uuid(),
   status: z.enum(["new", "contacted", "scheduled", "closed", "spam"]),
   actor: z.string().min(1).max(120).default("admin"),
+  adminToken: z.string().optional(),
 });
 
 export const updateConsultationStatus = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => UpdateStatusSchema.parse(input))
   .handler(async ({ data }) => {
-    requireAdmin();
+    requireAdmin(data.adminToken);
+
     const { getSql } = await import("./neon.server");
     const sql = getSql();
     const prev = (await sql`
@@ -129,12 +137,14 @@ const NoteSchema = z.object({
   id: z.string().uuid(),
   actor: z.string().min(1).max(120).default("admin"),
   note: z.string().min(1).max(2000),
+  adminToken: z.string().optional(),
 });
 
 export const addAuditNote = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => NoteSchema.parse(input))
   .handler(async ({ data }) => {
-    requireAdmin();
+    requireAdmin(data.adminToken);
+
     const { getSql } = await import("./neon.server");
     const sql = getSql();
     await sql`
