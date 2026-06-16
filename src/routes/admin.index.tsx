@@ -13,7 +13,7 @@ import {
   listConsultations, updateConsultationStatus, addAuditNote,
 } from "@/lib/consultations.functions";
 
-export const Route = createFileRoute("/admin")({
+export const Route = createFileRoute("/admin/")({
   head: () => ({
     meta: [
       { title: "Admin — Elite Vedic" },
