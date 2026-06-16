@@ -1,88 +1,42 @@
-# Neon Postgres Integration — Consultation Inquiries + Admin Audit Log
+## Admin Panel — `/admin` (token-gated, server-verified)
 
-Wire the existing Consult form to a Neon Postgres database, store every submission, and record an admin-action audit log for traceability. No Supabase, no auth UI — public submit, admin reads.
+A password-protected admin page to view and manage consultation inquiries. The password is the existing `ADMIN_API_TOKEN` secret stored server-side — it never appears in source code, the client bundle, or any committed file.
 
-## What you'll do (one-time)
-1. Create a free Neon project at neon.tech and copy the pooled connection string (looks like `postgres://user:pass@ep-xxx-pooler.region.aws.neon.tech/neondb?sslmode=require`).
-2. Run the SQL below in Neon's SQL Editor to create the tables.
-3. Approve this plan — I'll then request `NEON_DATABASE_URL` and `ADMIN_API_TOKEN` via the secrets tool so you can paste them securely.
+### Security model (why no dev can see the password)
 
-## SQL to run in Neon
+- The password = the `ADMIN_API_TOKEN` secret already in Lovable Cloud secrets.
+- Verification happens **server-side only** in a new server function `verifyAdminToken`, which compares the submitted token against `process.env.ADMIN_API_TOKEN` using a timing-safe equality check.
+- The client never receives the real token from the server. After a successful verify, the entered token is kept in `sessionStorage` (cleared on tab close) so the admin UI can attach it as the `x-admin-token` header on subsequent server-function calls. If a dev inspects the browser, they see only what *this admin* typed — not anything baked into code.
+- Nothing about the password lives in the repo: no `.env`, no constants, no fallback default. If the secret isn't configured, the server throws.
+- Rate-limit `verifyAdminToken` (e.g. 5 attempts / 10 min per IP hash) to deter brute force.
 
-```sql
--- Consultation inquiries submitted from the public form
-create table if not exists consultations (
-  id            uuid primary key default gen_random_uuid(),
-  full_name     text not null,
-  email         text not null,
-  phone         text,
-  dob           date,
-  birth_time    time,
-  birth_place   text,
-  question      text not null,
-  source        text default 'website',
-  status        text not null default 'new'
-                check (status in ('new','contacted','scheduled','closed','spam')),
-  ip_hash       text,
-  user_agent    text,
-  created_at    timestamptz not null default now(),
-  updated_at    timestamptz not null default now()
-);
-create index if not exists consultations_status_created_idx
-  on consultations (status, created_at desc);
-create index if not exists consultations_email_idx on consultations (email);
+### What gets built
 
--- Admin action audit trail (who did what, when, to which inquiry)
-create table if not exists audit_log (
-  id              bigserial primary key,
-  consultation_id uuid references consultations(id) on delete cascade,
-  actor           text not null,          -- admin email/name
-  action          text not null,          -- viewed | status_changed | note_added | exported | deleted
-  from_value      text,
-  to_value        text,
-  note            text,
-  ip_hash         text,
-  created_at      timestamptz not null default now()
-);
-create index if not exists audit_log_consult_idx
-  on audit_log (consultation_id, created_at desc);
-create index if not exists audit_log_actor_idx
-  on audit_log (actor, created_at desc);
+**1. `src/lib/admin.functions.ts`** — new
+- `verifyAdminToken({ token })` — public server fn. Timing-safe compare against `process.env.ADMIN_API_TOKEN`. Logs failed attempts to `audit_log` (`actor='unknown'`, `action='login_failed'`) and successful ones (`action='login_success'`). Returns `{ ok: true }` or throws.
 
--- Auto-update updated_at on consultations
-create or replace function set_updated_at()
-returns trigger language plpgsql as $$
-begin new.updated_at = now(); return new; end $$;
+**2. `src/lib/consultations.functions.ts`** — small tweak
+- Accept the admin token via `inputValidator` field too (in addition to the header), so the existing `useServerFn` calls can pass it cleanly from the client. Header still supported for external API users.
 
-drop trigger if exists consultations_set_updated_at on consultations;
-create trigger consultations_set_updated_at
-  before update on consultations
-  for each row execute function set_updated_at();
-```
+**3. `src/routes/admin.tsx`** — new page
+- If no token in `sessionStorage` → render a single password input + "Unlock" button. On submit, calls `verifyAdminToken`; on success, stores token in `sessionStorage` and shows the dashboard. On failure, shows generic "Invalid password" (no hints).
+- Dashboard:
+  - Table of inquiries (name, email, phone, question preview, status, created_at) using existing `listConsultations`.
+  - Status filter dropdown (`all / new / contacted / scheduled / closed / spam`).
+  - Per-row status dropdown → calls `updateConsultationStatus`.
+  - Per-row "Add note" → small dialog → calls `addAuditNote`.
+  - "Lock" button clears `sessionStorage` and returns to the password screen.
+- Pagination: simple Prev / Next (limit 50).
+- `noindex, nofollow` meta + excluded from any sitemap.
 
-## What I'll build in the app
+**4. No changes to:** Neon SQL, public consult form, design tokens, or existing routes.
 
-**Dependencies:** `@neondatabase/serverless` (HTTP driver — works on Cloudflare Workers), `zod`.
+### Out of scope
 
-**Server functions (`src/lib/consultations.functions.ts`):**
-- `submitConsultation` — public, no auth. Validates with Zod, hashes IP, inserts into `consultations`, writes `audit_log` row (`action='created'`, `actor='public'`). Basic rate-limit by IP hash (1 submit / 30s) to deter abuse.
-- `listConsultations` — admin only. Requires `x-admin-token` header matching `ADMIN_API_TOKEN`. Returns paginated rows. Logs `viewed` to `audit_log`.
-- `updateConsultationStatus` — admin only. Updates status, logs `status_changed` with `from_value`/`to_value`.
-- `addAuditNote` — admin only. Logs `note_added`.
+- No "remember me" / persistent login (sessionStorage only, by design).
+- No multi-user admin accounts or roles — single shared token. If you later want per-admin logins, that's a Supabase Auth migration, separate plan.
+- No CSV export, no email notifications, no astrologer profile table.
 
-**Server route (`src/routes/api/public/consult.ts`):**
-Thin POST wrapper around `submitConsultation` so external tools/forms can post too. Validates body, returns 201 + `{ id }`.
+### After approval
 
-**Frontend:**
-- Wire the existing `ConsultForm` on the home page to call `submitConsultation` via `useServerFn`. Show success toast on submit, inline errors on validation failure. No layout/visual changes.
-- No admin UI in this step. You'll query via the API token or directly in Neon. (Say the word and I'll add a `/admin` page in a follow-up.)
-
-**Neon client helper (`src/lib/neon.server.ts`):**
-Reads `process.env.NEON_DATABASE_URL` inside server boundary, exports a `sql` tagged-template. Server-only filename so it can never leak into the client bundle.
-
-## Secrets I'll request after approval
-- `NEON_DATABASE_URL` — pooled Neon connection string
-- `ADMIN_API_TOKEN` — random 32+ char string you generate; required header for admin reads
-
-## Out of scope
-No admin dashboard UI, no astrologer profile table (you said "Consultation inquiries + Admin action log" only — say the word if you want a `profiles` table too), no email notifications, no design changes.
+I'll implement the 3 file changes above. The `ADMIN_API_TOKEN` secret is already configured, so no new secret prompt is needed — you just visit `/admin` and type the token you set earlier.
