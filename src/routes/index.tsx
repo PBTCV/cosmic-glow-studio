@@ -1,22 +1,48 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
+import { useSuspenseQuery, queryOptions } from "@tanstack/react-query";
 import { useState } from "react";
 import { toast } from "sonner";
-import logoAsset from "@/assets/pradeepji.svg.asset.json";
+import logoAsset from "@/assets/pradeepji.svg";
 import { useReveal } from "@/hooks/use-reveal";
 import { submitConsultation } from "@/lib/consultations.functions";
+import { listAstrologersPublic } from "@/lib/astrologers.functions";
 import { Toaster } from "@/components/ui/sonner";
 
+const astrologersQuery = queryOptions({
+  queryKey: ["astrologers", "public"],
+  queryFn: () => listAstrologersPublic(),
+});
+
+type CouncilAstrologer = {
+  id: string;
+  slug: string;
+  full_name: string;
+  honorific: string | null;
+  title: string | null;
+  photo_url: string | null;
+  tagline: string | null;
+  languages: string[];
+  specialties: string[];
+  short_bio: string | null;
+  years_experience: number | null;
+  is_featured: boolean;
+  display_order: number;
+};
+
 export const Route = createFileRoute("/")({
+  loader: async ({ context }) => {
+    await context.queryClient.ensureQueryData(astrologersQuery);
+  },
   head: () => ({
     meta: [
-      { title: "Elite Vedic Consulting — Ancient Wisdom, Modern Strategy" },
+      { title: "Vedic Consulting — Ancient Wisdom, Modern Strategy" },
       {
         name: "description",
         content:
           "Executive-grade Vedic consulting. Astrology, Vastu, and strategic intelligence for founders, leaders, and enterprises.",
       },
-      { property: "og:title", content: "Elite Vedic Consulting" },
+      { property: "og:title", content: "Vedic Consulting" },
       {
         property: "og:description",
         content: "Ancient wisdom. Modern strategy. Cosmic clarity for decisive leaders.",
@@ -41,7 +67,7 @@ function NavLogo({ size = 40 }: { size?: number }) {
       className="inline-flex items-center justify-center border border-[var(--gold)]/40 bg-[var(--charcoal)] overflow-hidden rounded-sm"
       style={{ width: size, height: size }}
     >
-      <img src={logoAsset.url} alt="Pradeep Ji — Elite Vedic" className="w-full h-full object-contain" />
+      <img src={logoAsset} alt="Pradeep Ji" className="w-full h-full object-contain" />
     </span>
   );
 }
@@ -52,9 +78,7 @@ function Nav() {
       <div className="max-w-[1400px] mx-auto px-6 md:px-12 py-5 flex items-center justify-between">
         <a href="#top" className="flex items-center gap-3">
           <NavLogo size={40} />
-          <span className="font-display text-2xl tracking-tight text-foreground">
-            Elite <span className="italic text-[var(--gold)]">Vedic</span>
-          </span>
+          
         </a>
         <div className="hidden md:flex items-center gap-10">
           {["Insights", "Services", "Council", "Method"].map((l) => (
@@ -173,7 +197,7 @@ function Hero() {
         {/* Left — editorial */}
         <div className="flex flex-col gap-8 z-10">
           <div className="flex items-center gap-4 text-[var(--gold)]">
-            <span className="w-10 h-px bg-[var(--gold)]" />
+            {/* <span className="w-10 h-px bg-[var(--gold)]" /> */}
             <span className="label-caps">Legacy Wisdom · Modern Leaders</span>
           </div>
           <h1 className="font-display text-6xl md:text-7xl lg:text-8xl text-foreground leading-[0.92]">
@@ -232,11 +256,7 @@ function Hero() {
         </div>
       </div>
 
-      {/* corner mark */}
-      <div className="absolute bottom-8 left-8 hidden md:flex flex-col gap-2">
-        <div className="w-12 hairline" />
-        <div className="label-caps text-muted-foreground/70 text-[9px]">Ref. 01.002 // SV-24</div>
-      </div>
+      
     </section>
   );
 }
@@ -326,20 +346,27 @@ function Services() {
 
 function Council() {
   const ref = useReveal<HTMLDivElement>();
-  const experts = [
+  const { data } = useSuspenseQuery(astrologersQuery);
+  const astrologers = (data.rows ?? []) as CouncilAstrologer[];
+
+  const featured = astrologers.find((a) => a.is_featured) ?? astrologers[0];
+  const others = astrologers.filter((a) => a.id !== featured?.id);
+
+  const stats = [
     {
-      name: "Dr. Alistair Thorne",
-      role: "Vedic Strategy Lead",
-      bio: "Three decades of corporate logistics fused with the precise geometry of Vastu Shastra — optimizing enterprise environments for natural flow and peak operational efficiency.",
-      initials: "AT",
+      k: "Council Members",
+      v: String(astrologers.length),
     },
     {
-      name: "Elena Sterling",
-      role: "Celestial Intelligence Officer",
-      bio: "A master of Hellenistic astrology and modern psychometrics, bridging individual natal blueprints with professional leadership growth arcs.",
-      initials: "ES",
+      k: "Specialties",
+      v: String(new Set(astrologers.flatMap((a) => a.specialties ?? [])).size),
+    },
+    {
+      k: "Languages",
+      v: String(new Set(astrologers.flatMap((a) => a.languages ?? [])).size),
     },
   ];
+
   return (
     <section id="council" className="py-32 border-t border-[var(--gold)]/15 bg-[var(--cream)]/40">
       <div ref={ref} className="reveal max-w-[1400px] mx-auto px-6 md:px-12">
@@ -350,56 +377,137 @@ function Council() {
           </h2>
         </div>
 
-        <div className="grid grid-cols-12 gap-12">
-          {/* Featured */}
-          <div className="col-span-12 lg:col-span-7">
-            <div className="relative h-[520px] rounded-sm overflow-hidden border border-[var(--gold)]/30 bg-gradient-to-br from-white to-[var(--cream)] shadow-[0_30px_70px_-30px_rgba(26,26,26,0.20)]">
-              <div
-                className="absolute inset-0 opacity-60"
-                style={{ background: "radial-gradient(circle at 30% 30%, rgba(200,151,61,0.30), transparent 60%)" }}
-              />
-              <span className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 font-display italic text-[var(--gold)]/70 text-[12rem] leading-none">
-                {experts[0].initials}
-              </span>
-              <div className="absolute top-6 left-6 flex items-center gap-3">
-                <span className="w-2 h-2 rounded-full bg-[var(--gold)] animate-pulse" />
-                <span className="label-caps text-[var(--gold)] text-[10px]">Council · Featured</span>
-              </div>
-              <div className="absolute bottom-0 inset-x-0 p-8 bg-gradient-to-t from-white via-white/90 to-transparent">
-                <h3 className="font-display text-4xl text-foreground mb-2">{experts[0].name}</h3>
-                <p className="label-caps text-[var(--gold)] mb-3">{experts[0].role}</p>
-                <p className="text-muted-foreground max-w-lg leading-relaxed font-light">{experts[0].bio}</p>
-              </div>
-            </div>
+        {astrologers.length === 0 ? (
+          <div className="border border-[var(--gold)]/20 rounded-sm bg-card p-12 text-center">
+            <p className="font-display text-2xl text-foreground/80">Council profiles coming soon</p>
+            <p className="text-muted-foreground mt-2 text-sm font-light">
+              Our astrologer profiles are being prepared. Check back shortly.
+            </p>
           </div>
+        ) : (
+          <div className="grid grid-cols-12 gap-12">
+            {featured && (
+              <div className="col-span-12 lg:col-span-7">
+                <CouncilFeaturedCard astrologer={featured} />
+              </div>
+            )}
 
-          {/* Side stack */}
-          <div className="col-span-12 lg:col-span-5 flex flex-col gap-8">
-            <div className="bg-card border border-[var(--gold)]/20 p-8 hover:border-[var(--gold)]/60 transition-colors">
-              <span className="font-display italic text-[var(--gold)] text-6xl">{experts[1].initials}</span>
-              <h3 className="font-display text-3xl text-foreground mt-4 mb-2">{experts[1].name}</h3>
-              <p className="label-caps text-[var(--gold)] mb-3">{experts[1].role}</p>
-              <p className="text-muted-foreground leading-relaxed font-light text-sm">{experts[1].bio}</p>
-            </div>
-            <div className="bg-card border border-[var(--gold)]/20 p-8">
-              <p className="label-caps text-[var(--gold)] mb-6">Credentials</p>
-              <ul className="space-y-4">
-                {[
-                  { k: "Years of Practice", v: "30+" },
-                  { k: "Enterprise Clients", v: "120+" },
-                  { k: "Global Council Members", v: "12" },
-                ].map((c) => (
-                  <li key={c.k} className="flex items-baseline justify-between border-b border-[var(--gold)]/15 pb-3">
-                    <span className="text-muted-foreground text-sm">{c.k}</span>
-                    <span className="font-display italic text-[var(--gold)] text-3xl">{c.v}</span>
-                  </li>
-                ))}
-              </ul>
+            <div className="col-span-12 lg:col-span-5 flex flex-col gap-8">
+              {others.slice(0, 2).map((a) => (
+                <CouncilMemberCard key={a.id} astrologer={a} />
+              ))}
+              <div className="bg-card border border-[var(--gold)]/20 p-8">
+                <p className="label-caps text-[var(--gold)] mb-6">Credentials</p>
+                <ul className="space-y-4">
+                  {stats.map((c) => (
+                    <li key={c.k} className="flex items-baseline justify-between border-b border-[var(--gold)]/15 pb-3">
+                      <span className="text-muted-foreground text-sm">{c.k}</span>
+                      <span className="font-display italic text-[var(--gold)] text-3xl">{c.v}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
             </div>
           </div>
-        </div>
+        )}
       </div>
     </section>
+  );
+}
+
+function councilDisplayName(a: CouncilAstrologer) {
+  return a.honorific ? `${a.honorific} ${a.full_name}` : a.full_name;
+}
+
+function councilInitials(name: string) {
+  return name
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((w) => w[0]?.toUpperCase() ?? "")
+    .join("");
+}
+
+function councilBio(a: CouncilAstrologer) {
+  return a.short_bio || a.tagline || "Vedic counsel for leaders and enterprises.";
+}
+
+function CouncilFeaturedCard({ astrologer: a }: { astrologer: CouncilAstrologer }) {
+  const name = councilDisplayName(a);
+  return (
+    <Link
+      to="/astrologer/$slug"
+      params={{ slug: a.slug }}
+      className="group block relative h-[520px] rounded-sm overflow-hidden border border-[var(--gold)]/30 bg-gradient-to-br from-white to-[var(--cream)] shadow-[0_30px_70px_-30px_rgba(26,26,26,0.20)]"
+    >
+      {a.photo_url ? (
+        <img
+          src={a.photo_url}
+          alt={name}
+          className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+        />
+      ) : (
+        <span className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 font-display italic text-[var(--gold)]/70 text-[12rem] leading-none">
+          {councilInitials(a.full_name)}
+        </span>
+      )}
+      <div
+        className="absolute inset-0 opacity-60"
+        style={{ background: "radial-gradient(circle at 30% 30%, rgba(200,151,61,0.30), transparent 60%)" }}
+      />
+      <div className="absolute top-6 left-6 flex items-center gap-3">
+        <span className="w-2 h-2 rounded-full bg-[var(--gold)] animate-pulse" />
+        <span className="label-caps text-[var(--gold)] text-[10px]">
+          Council{a.is_featured ? " · Featured" : ""}
+        </span>
+      </div>
+      <div className="absolute bottom-0 inset-x-0 p-8 bg-gradient-to-t from-white via-white/95 to-transparent">
+        <h3 className="font-display text-4xl text-foreground mb-2 group-hover:text-[var(--gold)] transition-colors">
+          {name}
+        </h3>
+        {a.title && <p className="label-caps text-[var(--gold)] mb-3">{a.title}</p>}
+        <p className="text-muted-foreground max-w-lg leading-relaxed font-light line-clamp-3">
+          {councilBio(a)}
+        </p>
+        <span className="inline-flex items-center gap-2 mt-4 text-[var(--gold)] label-caps text-[10px] opacity-0 group-hover:opacity-100 transition-opacity">
+          View profile
+          <Icon name="arrow_forward" className="text-base" />
+        </span>
+      </div>
+    </Link>
+  );
+}
+
+function CouncilMemberCard({ astrologer: a }: { astrologer: CouncilAstrologer }) {
+  const name = councilDisplayName(a);
+  return (
+    <Link
+      to="/astrologer/$slug"
+      params={{ slug: a.slug }}
+      className="group bg-card border border-[var(--gold)]/20 p-8 hover:border-[var(--gold)]/60 transition-colors"
+    >
+      {a.photo_url ? (
+        <img
+          src={a.photo_url}
+          alt={name}
+          className="w-16 h-16 rounded-full object-cover border border-[var(--gold)]/30"
+        />
+      ) : (
+        <span className="font-display italic text-[var(--gold)] text-6xl">{councilInitials(a.full_name)}</span>
+      )}
+      <h3 className="font-display text-3xl text-foreground mt-4 mb-2 group-hover:text-[var(--gold)] transition-colors">
+        {name}
+      </h3>
+      {a.title && <p className="label-caps text-[var(--gold)] mb-3">{a.title}</p>}
+      <p className="text-muted-foreground leading-relaxed font-light text-sm line-clamp-4">
+        {councilBio(a)}
+      </p>
+      {(a.specialties?.length ?? 0) > 0 && (
+        <p className="text-xs text-muted-foreground mt-3">
+          {a.specialties.slice(0, 3).join(" · ")}
+        </p>
+      )}
+    </Link>
   );
 }
 
@@ -596,8 +704,9 @@ function Footer() {
           <div className="md:col-span-2">
             <div className="flex items-center gap-3 mb-5">
               <NavLogo size={40} />
-              <span className="font-display text-2xl text-[var(--offwhite)]">
-                Elite <span className="italic text-[var(--gold-bright)]">Vedic</span>
+              <span className="font-display text-xl md:text-2xl text-[var(--offwhite)] leading-tight">
+                Pradeep Bhanot&apos;s{" "}
+                <span className="italic text-[var(--gold-bright)]">The Cosmic Voice</span>
               </span>
             </div>
             <p className="text-[var(--silver)]/80 max-w-md leading-relaxed font-light">
@@ -617,15 +726,15 @@ function Footer() {
           <div>
             <p className="label-caps text-[var(--gold-bright)] mb-5">Contact</p>
             <ul className="space-y-3 text-[var(--silver)]/80 font-light">
-              <li>concierge@elitevedic.co</li>
-              <li>+1 (212) 555 — 0888</li>
-              <li>New York · Mumbai · London</li>
+              <li>Pradeepbhanot@gmail.com</li>
+              <li>+91 78889 33521</li>
+              <li> Panchkula, Haryana, India</li>
             </ul>
           </div>
         </div>
         <div className="border-t border-[var(--gold-bright)]/15 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-[var(--silver)]/50 text-sm font-light">
-            © {new Date().getFullYear()} Elite Vedic Consulting. All rights reserved.
+            © {new Date().getFullYear()} Pradeep Bhanot's The Cosmic Voice. All rights reserved.
           </p>
           <div className="flex gap-3">
             {["share", "mail", "language"].map((i) => (
@@ -649,7 +758,7 @@ function Index() {
       <Nav />
       <main>
         <Hero />
-        <TrustBar />
+        {/* <TrustBar /> */}
         <Services />
         <Council />
         <ConsultForm />

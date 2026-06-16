@@ -1,12 +1,12 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
-import { Toaster } from "@/components/ui/sonner";
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
-import { clearAdminToken, getAdminToken } from "@/lib/admin-token";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useAdmin } from "@/components/admin/admin-shell";
 import { deleteAstrologer, listAstrologersAdmin } from "@/lib/astrologers.functions";
 
 export const Route = createFileRoute("/admin/astrologers/")({
@@ -29,152 +29,155 @@ type Row = {
 };
 
 function AstrologersAdmin() {
-  const navigate = useNavigate();
+  const { token, lock } = useAdmin();
   const list = useServerFn(listAstrologersAdmin);
   const del = useServerFn(deleteAstrologer);
   const [rows, setRows] = useState<Row[]>([]);
   const [loading, setLoading] = useState(true);
-  const [token, setToken] = useState<string | null>(null);
 
-  useEffect(() => {
-    const t = getAdminToken();
-    if (!t) {
-      void navigate({ to: "/admin" });
-      return;
-    }
-    setToken(t);
-  }, [navigate]);
-
-  const load = useCallback(async (t: string) => {
+  const load = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await list({ data: { adminToken: t } });
+      const res = await list({ data: { adminToken: token } });
       setRows(res.rows as Row[]);
     } catch (err) {
-      const msg = err instanceof Error ? err.message : "Failed";
+      const msg = err instanceof Error ? err.message : "Failed to load";
       toast.error(msg);
-      if (msg.includes("Unauthorized")) {
-        clearAdminToken();
-        void navigate({ to: "/admin" });
-      }
+      if (msg.includes("Unauthorized")) lock();
     } finally {
       setLoading(false);
     }
-  }, [list, navigate]);
+  }, [list, token, lock]);
 
   useEffect(() => {
-    if (token) void load(token);
-  }, [token, load]);
+    void load();
+  }, [load]);
 
   async function remove(id: string, name: string) {
-    if (!token) return;
     if (!window.confirm(`Delete "${name}"? This cannot be undone.`)) return;
     try {
       await del({ data: { id, adminToken: token } });
       toast.success("Deleted");
-      void load(token);
+      void load();
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Failed");
+      toast.error(err instanceof Error ? err.message : "Failed to delete");
     }
   }
 
   return (
-    <div className="min-h-screen bg-[var(--background)] text-foreground">
-      <div className="max-w-[1400px] mx-auto px-6 md:px-10 py-10">
-        <AdminNav />
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h1 className="font-display text-3xl text-[var(--gold)]">Astrologers</h1>
-            <p className="text-sm text-muted-foreground mt-1">Manage council profiles</p>
-          </div>
-          <Link
-            to="/admin/astrologers/$id"
-            params={{ id: "new" }}
-            className="inline-flex items-center gap-2 h-9 px-4 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90"
-          >
-            + New astrologer
-          </Link>
+    <>
+      <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-8">
+        <div>
+          <h1 className="font-display text-3xl text-[var(--gold)]">Astrologers</h1>
+          <p className="text-sm text-muted-foreground mt-1">Manage council profiles</p>
         </div>
+        <Link
+          to="/admin/astrologers/$id"
+          params={{ id: "new" }}
+          className="inline-flex items-center justify-center gap-2 h-9 px-4 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90"
+        >
+          + New astrologer
+        </Link>
+      </div>
 
-        <div className="border border-[var(--gold)]/15 rounded-lg overflow-hidden">
+      <div className="border border-[var(--gold)]/15 rounded-xl overflow-hidden bg-card/30">
+        <div className="overflow-x-auto">
           <Table>
             <TableHeader>
-              <TableRow>
+              <TableRow className="hover:bg-transparent">
                 <TableHead>Photo</TableHead>
                 <TableHead>Name</TableHead>
-                <TableHead>Title</TableHead>
-                <TableHead>Specialties</TableHead>
-                <TableHead>Order</TableHead>
+                <TableHead className="hidden md:table-cell">Title</TableHead>
+                <TableHead className="hidden lg:table-cell">Specialties</TableHead>
                 <TableHead>Active</TableHead>
-                <TableHead>Featured</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
+              {loading &&
+                Array.from({ length: 4 }).map((_, i) => (
+                  <TableRow key={i}>
+                    {Array.from({ length: 6 }).map((__, j) => (
+                      <TableCell key={j}><Skeleton className="h-4 w-full max-w-[100px]" /></TableCell>
+                    ))}
+                  </TableRow>
+                ))}
+
               {!loading && rows.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={8} className="text-center text-muted-foreground py-8">
-                    No astrologers yet — click "New astrologer" to add one.
+                  <TableCell colSpan={6} className="text-center text-muted-foreground py-16">
+                    <p className="font-display text-lg text-foreground/70">No astrologers yet</p>
+                    <p className="text-sm mt-1">Create your first council profile to get started.</p>
                   </TableCell>
                 </TableRow>
               )}
-              {rows.map((r) => (
-                <TableRow key={r.id}>
-                  <TableCell>
-                    {r.photo_url ? (
-                      <img src={r.photo_url} alt="" className="w-10 h-10 rounded-full object-cover border border-[var(--gold)]/30" />
-                    ) : (
-                      <div className="w-10 h-10 rounded-full bg-muted" />
-                    )}
-                  </TableCell>
-                  <TableCell className="font-medium">
-                    {r.honorific ? `${r.honorific} ` : ""}{r.full_name}
-                    <div className="text-xs text-muted-foreground">/{r.slug}</div>
-                  </TableCell>
-                  <TableCell>{r.title ?? "—"}</TableCell>
-                  <TableCell className="max-w-[260px] truncate">
-                    {(r.specialties ?? []).join(", ") || "—"}
-                  </TableCell>
-                  <TableCell>{r.display_order}</TableCell>
-                  <TableCell>{r.is_active ? "Yes" : "No"}</TableCell>
-                  <TableCell>{r.is_featured ? "★" : "—"}</TableCell>
-                  <TableCell className="text-right space-x-2">
-                    <Link
-                      to="/admin/astrologers/$id"
-                      params={{ id: r.id }}
-                      className="text-sm text-[var(--gold)] hover:underline"
-                    >
-                      Edit
-                    </Link>
-                    <button
-                      onClick={() => remove(r.id, r.full_name)}
-                      className="text-sm text-destructive hover:underline"
-                    >
-                      Delete
-                    </button>
-                  </TableCell>
-                </TableRow>
-              ))}
+
+              {!loading &&
+                rows.map((r) => (
+                  <TableRow key={r.id}>
+                    <TableCell>
+                      {r.photo_url ? (
+                        <img
+                          src={r.photo_url}
+                          alt=""
+                          className="w-10 h-10 rounded-full object-cover border border-[var(--gold)]/30"
+                        />
+                      ) : (
+                        <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center text-xs text-muted-foreground">
+                          {r.full_name.charAt(0)}
+                        </div>
+                      )}
+                    </TableCell>
+                    <TableCell className="font-medium">
+                      {r.honorific ? `${r.honorific} ` : ""}{r.full_name}
+                      {r.is_featured && <span className="ml-1.5 text-[var(--gold)]" title="Featured">★</span>}
+                      <div className="text-xs text-muted-foreground">/{r.slug}</div>
+                    </TableCell>
+                    <TableCell className="hidden md:table-cell">{r.title ?? "—"}</TableCell>
+                    <TableCell className="hidden lg:table-cell max-w-[260px] truncate">
+                      {(r.specialties ?? []).join(", ") || "—"}
+                    </TableCell>
+                    <TableCell>
+                      <span
+                        className={`inline-flex px-2 py-0.5 rounded-full text-xs border ${
+                          r.is_active
+                            ? "bg-emerald-500/15 text-emerald-800 border-emerald-500/30"
+                            : "bg-muted text-muted-foreground border-border"
+                        }`}
+                      >
+                        {r.is_active ? "Active" : "Inactive"}
+                      </span>
+                    </TableCell>
+                    <TableCell className="text-right space-x-3 whitespace-nowrap">
+                      <Link
+                        to="/admin/astrologers/$id"
+                        params={{ id: r.id }}
+                        search={{ tab: "services" }}
+                        className="text-sm text-muted-foreground hover:text-[var(--gold)]"
+                      >
+                        Services
+                      </Link>
+                      <Link
+                        to="/admin/astrologers/$id"
+                        params={{ id: r.id }}
+                        className="text-sm text-[var(--gold)] hover:underline"
+                      >
+                        Edit
+                      </Link>
+                      <button
+                        type="button"
+                        onClick={() => void remove(r.id, r.full_name)}
+                        className="text-sm text-destructive hover:underline"
+                      >
+                        Delete
+                      </button>
+                    </TableCell>
+                  </TableRow>
+                ))}
             </TableBody>
           </Table>
         </div>
       </div>
-      <Toaster />
-    </div>
-  );
-}
-
-function AdminNav() {
-  return (
-    <nav className="flex items-center gap-6 mb-8 pb-4 border-b border-[var(--gold)]/15">
-      <Link to="/admin" className="text-sm text-muted-foreground hover:text-[var(--gold)]">Consultations</Link>
-      <Link to="/admin/astrologers" className="text-sm text-[var(--gold)] font-medium">Astrologers</Link>
-      <button
-        onClick={() => { clearAdminToken(); window.location.href = "/admin"; }}
-        className="ml-auto text-sm text-muted-foreground hover:text-foreground"
-      >
-        Lock
-      </button>
-    </nav>
+    </>
   );
 }

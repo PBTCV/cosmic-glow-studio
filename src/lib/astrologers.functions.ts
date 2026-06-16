@@ -65,7 +65,8 @@ export const listAstrologersPublic = createServerFn({ method: "GET" }).handler(a
   const sql = getSql();
   const rows = (await sql`
     select id, slug, full_name, honorific, title, photo_url, tagline,
-           languages, specialties, short_bio, is_featured, display_order
+           languages, specialties, short_bio, years_experience,
+           is_featured, display_order
     from astrologers
     where is_active = true
     order by display_order asc, created_at desc

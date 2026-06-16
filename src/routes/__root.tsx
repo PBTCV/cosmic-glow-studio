@@ -77,10 +77,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Elite Vedic Consulting — Ancient Wisdom, Modern Strategy" },
+      { title: "Vedic Consulting — Ancient Wisdom, Modern Strategy" },
       { name: "description", content: "Executive Vedic consulting blending astrology, Vastu, and strategic intelligence for leaders and enterprises." },
-      { name: "author", content: "Elite Vedic Consulting" },
-      { property: "og:title", content: "Elite Vedic Consulting" },
+      { name: "author", content: "Pradeep Ji" },
+      { property: "og:title", content: "Vedic Consulting" },
       { property: "og:description", content: "Ancient wisdom. Modern strategy. Executive-grade Vedic consulting." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
