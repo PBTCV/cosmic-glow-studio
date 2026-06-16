@@ -1,42 +1,128 @@
-## Admin Panel — `/admin` (token-gated, server-verified)
+## Astrologer Profiles — schema, admin CRUD, public pages
 
-A password-protected admin page to view and manage consultation inquiries. The password is the existing `ADMIN_API_TOKEN` secret stored server-side — it never appears in source code, the client bundle, or any committed file.
+Multiple astrologers, each with a dedicated public page, listed together on a Council section, and managed from the existing `/admin` panel.
 
-### Security model (why no dev can see the password)
+### Neon SQL (run in Neon SQL Editor)
 
-- The password = the `ADMIN_API_TOKEN` secret already in Lovable Cloud secrets.
-- Verification happens **server-side only** in a new server function `verifyAdminToken`, which compares the submitted token against `process.env.ADMIN_API_TOKEN` using a timing-safe equality check.
-- The client never receives the real token from the server. After a successful verify, the entered token is kept in `sessionStorage` (cleared on tab close) so the admin UI can attach it as the `x-admin-token` header on subsequent server-function calls. If a dev inspects the browser, they see only what *this admin* typed — not anything baked into code.
-- Nothing about the password lives in the repo: no `.env`, no constants, no fallback default. If the secret isn't configured, the server throws.
-- Rate-limit `verifyAdminToken` (e.g. 5 attempts / 10 min per IP hash) to deter brute force.
+```sql
+create table if not exists astrologers (
+  id              uuid primary key default gen_random_uuid(),
+  slug            text not null unique,           -- e.g. 'pradeep-ji'
+  -- Identity
+  full_name       text not null,
+  honorific       text,                           -- "Acharya", "Pandit", "Sri"
+  title           text,                           -- "Founder & Chief Astrologer"
+  photo_url       text,
+  languages       text[] default '{}',            -- ['English','Hindi','Sanskrit']
+  -- Credentials
+  years_experience int,
+  specialties     text[] default '{}',            -- ['Vedic','Vastu','Numerology']
+  certifications  text[] default '{}',
+  lineage         text,                           -- guru / parampara
+  -- Bio & philosophy
+  tagline         text,                           -- short one-liner
+  short_bio       text,                           -- 1-2 paragraphs (listing/about)
+  long_bio        text,                           -- full page content
+  quote           text,
+  philosophy      text,
+  -- Contact & social
+  email           text,
+  phone           text,
+  whatsapp        text,
+  website_url     text,
+  instagram_url   text,
+  youtube_url     text,
+  linkedin_url    text,
+  -- Display
+  is_active       boolean not null default true,
+  is_featured     boolean not null default false,
+  display_order   int not null default 0,
+  created_at      timestamptz not null default now(),
+  updated_at      timestamptz not null default now()
+);
+create index if not exists astrologers_active_order_idx
+  on astrologers (is_active, display_order, created_at desc);
 
-### What gets built
+drop trigger if exists astrologers_set_updated_at on astrologers;
+create trigger astrologers_set_updated_at
+  before update on astrologers
+  for each row execute function set_updated_at();
 
-**1. `src/lib/admin.functions.ts`** — new
-- `verifyAdminToken({ token })` — public server fn. Timing-safe compare against `process.env.ADMIN_API_TOKEN`. Logs failed attempts to `audit_log` (`actor='unknown'`, `action='login_failed'`) and successful ones (`action='login_success'`). Returns `{ ok: true }` or throws.
+-- Services offered by each astrologer
+create table if not exists astrologer_services (
+  id                uuid primary key default gen_random_uuid(),
+  astrologer_id    uuid not null references astrologers(id) on delete cascade,
+  name              text not null,                -- "Career Reading"
+  description       text,
+  duration_minutes  int,
+  price_amount      numeric(10,2),
+  price_currency    text default 'INR',
+  modes             text[] default '{}',          -- ['in_person','video','phone']
+  display_order     int not null default 0,
+  is_active         boolean not null default true,
+  created_at        timestamptz not null default now()
+);
+create index if not exists astrologer_services_astrologer_idx
+  on astrologer_services (astrologer_id, display_order);
 
-**2. `src/lib/consultations.functions.ts`** — small tweak
-- Accept the admin token via `inputValidator` field too (in addition to the header), so the existing `useServerFn` calls can pass it cleanly from the client. Header still supported for external API users.
+-- Weekly availability windows (simple, timezone-aware)
+create table if not exists astrologer_availability (
+  id              uuid primary key default gen_random_uuid(),
+  astrologer_id  uuid not null references astrologers(id) on delete cascade,
+  timezone        text not null default 'Asia/Kolkata',
+  day_of_week     int not null check (day_of_week between 0 and 6), -- 0=Sun
+  start_time      time not null,
+  end_time        time not null,
+  created_at      timestamptz not null default now()
+);
+create index if not exists astrologer_availability_astrologer_idx
+  on astrologer_availability (astrologer_id, day_of_week);
+```
 
-**3. `src/routes/admin.tsx`** — new page
-- If no token in `sessionStorage` → render a single password input + "Unlock" button. On submit, calls `verifyAdminToken`; on success, stores token in `sessionStorage` and shows the dashboard. On failure, shows generic "Invalid password" (no hints).
-- Dashboard:
-  - Table of inquiries (name, email, phone, question preview, status, created_at) using existing `listConsultations`.
-  - Status filter dropdown (`all / new / contacted / scheduled / closed / spam`).
-  - Per-row status dropdown → calls `updateConsultationStatus`.
-  - Per-row "Add note" → small dialog → calls `addAuditNote`.
-  - "Lock" button clears `sessionStorage` and returns to the password screen.
-- Pagination: simple Prev / Next (limit 50).
-- `noindex, nofollow` meta + excluded from any sitemap.
+### Server functions — `src/lib/astrologers.functions.ts`
 
-**4. No changes to:** Neon SQL, public consult form, design tokens, or existing routes.
+Public (no auth):
+- `listAstrologersPublic()` — active only, ordered by `display_order`, returns identity/bio/specialties for listing.
+- `getAstrologerBySlug({ slug })` — full profile + services + availability for the dedicated page.
 
-### Out of scope
+Admin (token-gated, same `adminToken` pattern as consultations):
+- `listAstrologersAdmin({ adminToken })` — all rows incl. inactive.
+- `getAstrologerAdmin({ adminToken, id })` — full row + services + availability.
+- `upsertAstrologer({ adminToken, data })` — create or update. Auto-generates `slug` from `full_name` when missing; ensures uniqueness.
+- `deleteAstrologer({ adminToken, id })` — hard delete (cascades services/availability).
+- `upsertService({ adminToken, ... })` / `deleteService(...)`.
+- `upsertAvailability({ adminToken, ... })` / `deleteAvailability(...)`.
 
-- No "remember me" / persistent login (sessionStorage only, by design).
-- No multi-user admin accounts or roles — single shared token. If you later want per-admin logins, that's a Supabase Auth migration, separate plan.
-- No CSV export, no email notifications, no astrologer profile table.
+All admin writes append an `audit_log` row (`actor='admin'`, `action='astrologer_*'`, `to_value`=id).
 
-### After approval
+### Admin UI additions
 
-I'll implement the 3 file changes above. The `ADMIN_API_TOKEN` secret is already configured, so no new secret prompt is needed — you just visit `/admin` and type the token you set earlier.
+**`/admin/astrologers`** — list page
+- Table: photo, name, title, specialties, featured, active, order, edit/delete.
+- "+ New astrologer" button → `/admin/astrologers/new`.
+
+**`/admin/astrologers/$id`** — editor (also handles `new`)
+- Tabs: **Profile** (identity/credentials/bio/social), **Services**, **Availability**.
+- Photo: paste URL for v1 (no file upload — keeps scope tight; image upload is a separate plan if you want it).
+- Save buttons per tab; each calls the corresponding upsert fn.
+
+Add a sidebar link in the existing admin dashboard: "Consultations" / "Astrologers".
+
+### Public pages
+
+- **Council section on `/`** — query `listAstrologersPublic`, render cards (photo, name, title, tagline, specialties chips) with a "View profile" link to `/astrologer/$slug`. Replaces the current static Council content.
+- **`/astrologer/$slug`** — dedicated profile page. Loader uses TanStack Query + `getAstrologerBySlug`. Sections: hero (photo, name, honorific, title, tagline, languages), credentials (years, specialties, certifications, lineage), long bio + philosophy + quote, services (cards with price/duration/modes), availability (weekly grid), contact & social links, CTA back to Consult form. Per-route `head()` with title/description/og:title/og:description derived from the profile and `og:image` = `photo_url`. Returns `notFound()` when slug is missing.
+
+### Files
+
+- New: `src/lib/astrologers.functions.ts`, `src/routes/admin.astrologers.tsx`, `src/routes/admin.astrologers.$id.tsx`, `src/routes/astrologer.$slug.tsx`.
+- Edited: `src/routes/admin.tsx` (add nav tabs to Consultations / Astrologers), `src/routes/index.tsx` (Council section now data-driven).
+- Neon: run the SQL above before testing.
+
+### Out of scope (call out if you want it next)
+
+- Image upload (currently URL only).
+- Booking/scheduling against availability slots.
+- Rich-text editor for `long_bio` (plain textarea + line breaks for now).
+- Reviews/testimonials per astrologer.
+- Per-astrologer assignment on consultation rows.
