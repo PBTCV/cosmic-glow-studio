@@ -155,11 +155,11 @@ function Hero() {
     <section id="top" className="relative min-h-screen pt-32 pb-24 overflow-hidden paper-vignette">
       {/* ambient gold glows */}
       <div
-        className="pointer-events-none absolute -top-40 -right-40 w-[700px] h-[700px] rounded-full blur-3xl"
+        className="pointer-events-none absolute -top-40 -right-40 w-[500px] h-[500px] rounded-full blur-2xl"
         style={{ background: "radial-gradient(closest-side, rgba(244,182,82,0.28), transparent)" }}
       />
       <div
-        className="pointer-events-none absolute -bottom-40 -left-40 w-[600px] h-[600px] rounded-full blur-3xl"
+        className="pointer-events-none absolute -bottom-40 -left-40 w-[450px] h-[450px] rounded-full blur-2xl"
         style={{ background: "radial-gradient(closest-side, rgba(200,151,61,0.18), transparent)" }}
       />
       <Sparkles />
