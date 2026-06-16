@@ -43,7 +43,7 @@ function NavLogo({ size = 40 }: { size?: number }) {
 
 function Nav() {
   return (
-    <nav className="fixed top-0 inset-x-0 z-50 backdrop-blur-xl bg-[var(--background)]/75 border-b border-[var(--gold)]/15">
+    <nav className="fixed top-0 inset-x-0 z-50 backdrop-blur-md bg-[var(--background)]/85 border-b border-[var(--gold)]/15">
       <div className="max-w-[1400px] mx-auto px-6 md:px-12 py-5 flex items-center justify-between">
         <a href="#top" className="flex items-center gap-3">
           <NavLogo size={40} />
