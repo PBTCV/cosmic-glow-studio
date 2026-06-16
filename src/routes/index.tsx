@@ -84,7 +84,7 @@ const orbitalNodes = [
 function Sparkles() {
   return (
     <div aria-hidden className="absolute inset-0 pointer-events-none overflow-hidden">
-      {Array.from({ length: 14 }).map((_, i) => (
+      {Array.from({ length: 6 }).map((_, i) => (
         <span
           key={i}
           className="absolute w-[3px] h-[3px] rounded-full bg-[var(--gold)]/70 animate-sparkle"
@@ -99,6 +99,8 @@ function Sparkles() {
     </div>
   );
 }
+
+const r3 = (n: number) => Math.round(n * 1000) / 1000;
 
 /* Celestial compass mark — replaces the logo in the medallion */
 function CelestialMark() {
@@ -118,46 +120,29 @@ function CelestialMark() {
         </linearGradient>
       </defs>
 
-      {/* disc */}
       <circle cx="120" cy="120" r="118" fill="url(#discGlow)" />
       <circle cx="120" cy="120" r="116" fill="none" stroke="#c8973d" strokeOpacity="0.35" strokeWidth="0.6" />
       <circle cx="120" cy="120" r="100" fill="none" stroke="#c8973d" strokeOpacity="0.25" strokeWidth="0.5" />
 
-      {/* zodiac dot ring (12 points) */}
       {points.map((_, i) => {
         const a = (i / 12) * Math.PI * 2 - Math.PI / 2;
-        const x = 120 + Math.cos(a) * 92;
-        const y = 120 + Math.sin(a) * 92;
+        const x = r3(120 + Math.cos(a) * 92);
+        const y = r3(120 + Math.sin(a) * 92);
         return <circle key={i} cx={x} cy={y} r={i % 3 === 0 ? 2.4 : 1.4} fill="#c8973d" />;
       })}
 
-      {/* tick marks */}
-      {Array.from({ length: 60 }).map((_, i) => {
-        const a = (i / 60) * Math.PI * 2;
-        const x1 = 120 + Math.cos(a) * 80;
-        const y1 = 120 + Math.sin(a) * 80;
-        const x2 = 120 + Math.cos(a) * (i % 5 === 0 ? 74 : 77);
-        const y2 = 120 + Math.sin(a) * (i % 5 === 0 ? 74 : 77);
-        return <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} stroke="#c8973d" strokeOpacity={i % 5 === 0 ? 0.6 : 0.25} strokeWidth="0.6" />;
+      {Array.from({ length: 24 }).map((_, i) => {
+        const a = (i / 24) * Math.PI * 2;
+        const x1 = r3(120 + Math.cos(a) * 80);
+        const y1 = r3(120 + Math.sin(a) * 80);
+        const x2 = r3(120 + Math.cos(a) * (i % 2 === 0 ? 74 : 77));
+        const y2 = r3(120 + Math.sin(a) * (i % 2 === 0 ? 74 : 77));
+        return <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} stroke="#c8973d" strokeOpacity={i % 2 === 0 ? 0.6 : 0.25} strokeWidth="0.6" />;
       })}
 
-      {/* 8-point compass star */}
       <g transform="translate(120 120)">
-        {/* primary 4-point */}
-        <polygon
-          points="0,-66 10,-10 66,0 10,10 0,66 -10,10 -66,0 -10,-10"
-          fill="url(#starGold)"
-          stroke="#8a6520"
-          strokeWidth="0.6"
-        />
-        {/* secondary diagonals */}
-        <polygon
-          points="0,-44 7,-7 44,0 7,7 0,44 -7,7 -44,0 -7,-7"
-          transform="rotate(45)"
-          fill="#e8b85a"
-          opacity="0.85"
-        />
-        {/* center */}
+        <polygon points="0,-66 10,-10 66,0 10,10 0,66 -10,10 -66,0 -10,-10" fill="url(#starGold)" stroke="#8a6520" strokeWidth="0.6" />
+        <polygon points="0,-44 7,-7 44,0 7,7 0,44 -7,7 -44,0 -7,-7" transform="rotate(45)" fill="#e8b85a" opacity="0.85" />
         <circle r="6" fill="#faf6ee" stroke="#8a6520" strokeWidth="0.8" />
         <circle r="2" fill="#c8973d" />
       </g>
