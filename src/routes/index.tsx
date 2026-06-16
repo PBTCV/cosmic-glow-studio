@@ -1,6 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
+import { useState } from "react";
+import { toast } from "sonner";
 import logoAsset from "@/assets/pradeepji.svg.asset.json";
 import { useReveal } from "@/hooks/use-reveal";
+import { submitConsultation } from "@/lib/consultations.functions";
+import { Toaster } from "@/components/ui/sonner";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -398,12 +403,32 @@ function Council() {
   );
 }
 
-function Field({ label, placeholder, type = "text" }: { label: string; placeholder?: string; type?: string }) {
+function Field({
+  label,
+  placeholder,
+  type = "text",
+  name,
+  value,
+  onChange,
+  required,
+}: {
+  label: string;
+  placeholder?: string;
+  type?: string;
+  name?: string;
+  value?: string;
+  onChange?: (v: string) => void;
+  required?: boolean;
+}) {
   return (
     <div className="space-y-2">
       <label className="label-caps text-muted-foreground text-[10px]">{label}</label>
       <input
         type={type}
+        name={name}
+        value={value}
+        onChange={onChange ? (e) => onChange(e.target.value) : undefined}
+        required={required}
         placeholder={placeholder}
         className="w-full bg-transparent border-b border-[var(--gold)]/30 focus:border-[var(--gold)] py-3 outline-none transition-colors text-foreground placeholder:text-muted-foreground/50"
       />
@@ -442,41 +467,7 @@ function ConsultForm() {
           </div>
 
           <div className="col-span-12 lg:col-span-7">
-            <form
-              className="glass-card p-10 md:p-12 space-y-8 relative overflow-hidden rounded-sm"
-              onSubmit={(e) => e.preventDefault()}
-            >
-              <div
-                className="absolute -top-32 -right-32 w-96 h-96 rounded-full blur-3xl pointer-events-none"
-                style={{ background: "radial-gradient(closest-side, rgba(244,182,82,0.25), transparent)" }}
-              />
-              <div className="relative grid grid-cols-1 md:grid-cols-2 gap-8">
-                <Field label="Full Name" placeholder="Jane Doe" />
-                <Field label="Email Address" placeholder="jane@enterprise.com" type="email" />
-              </div>
-              <div className="relative grid grid-cols-1 md:grid-cols-2 gap-8">
-                <Field label="Birth Date" type="date" />
-                <Field label="Exact Birth Time" type="time" />
-              </div>
-              <div className="relative">
-                <Field label="Birth Location (City, Country)" placeholder="Mumbai, India" />
-              </div>
-              <div className="relative">
-                <label className="label-caps text-muted-foreground text-[10px]">Intention</label>
-                <textarea
-                  rows={3}
-                  placeholder="Describe the decision or season you are navigating…"
-                  className="mt-2 w-full bg-transparent border-b border-[var(--gold)]/30 focus:border-[var(--gold)] py-3 outline-none transition-colors text-foreground placeholder:text-muted-foreground/50 resize-none"
-                />
-              </div>
-              <button
-                type="submit"
-                className="btn-sweep relative w-full border border-[var(--gold)] text-[var(--gold)] hover:text-white py-5 label-caps transition-colors flex items-center justify-center gap-3 group"
-              >
-                Generate Strategic Blueprint
-                <Icon name="auto_awesome" filled className="text-base group-hover:rotate-12 transition-transform" />
-              </button>
-            </form>
+            <ConsultFormFields />
           </div>
         </div>
       </div>
