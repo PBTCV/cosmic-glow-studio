@@ -172,11 +172,16 @@ function Dashboard({ token, onLock }: { token: string; onLock: () => void }) {
 
   return (
     <div className="max-w-[1400px] mx-auto px-6 md:px-10 py-10">
+      <nav className="flex items-center gap-6 mb-8 pb-4 border-b border-[var(--gold)]/15">
+        <a href="/admin" className="text-sm text-[var(--gold)] font-medium">Consultations</a>
+        <a href="/admin/astrologers" className="text-sm text-muted-foreground hover:text-[var(--gold)]">Astrologers</a>
+      </nav>
       <div className="flex items-center justify-between mb-8">
         <div>
           <h1 className="font-display text-3xl text-[var(--gold)]">Consultations</h1>
           <p className="text-sm text-muted-foreground mt-1">Admin dashboard</p>
         </div>
+
         <div className="flex items-center gap-3">
           <select
             value={status}
