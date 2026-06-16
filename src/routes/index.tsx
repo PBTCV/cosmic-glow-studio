@@ -1,6 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
+import { useState } from "react";
+import { toast } from "sonner";
 import logoAsset from "@/assets/pradeepji.svg.asset.json";
 import { useReveal } from "@/hooks/use-reveal";
+import { submitConsultation } from "@/lib/consultations.functions";
+import { Toaster } from "@/components/ui/sonner";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -398,12 +403,32 @@ function Council() {
   );
 }
 
-function Field({ label, placeholder, type = "text" }: { label: string; placeholder?: string; type?: string }) {
+function Field({
+  label,
+  placeholder,
+  type = "text",
+  name,
+  value,
+  onChange,
+  required,
+}: {
+  label: string;
+  placeholder?: string;
+  type?: string;
+  name?: string;
+  value?: string;
+  onChange?: (v: string) => void;
+  required?: boolean;
+}) {
   return (
     <div className="space-y-2">
       <label className="label-caps text-muted-foreground text-[10px]">{label}</label>
       <input
         type={type}
+        name={name}
+        value={value}
+        onChange={onChange ? (e) => onChange(e.target.value) : undefined}
+        required={required}
         placeholder={placeholder}
         className="w-full bg-transparent border-b border-[var(--gold)]/30 focus:border-[var(--gold)] py-3 outline-none transition-colors text-foreground placeholder:text-muted-foreground/50"
       />
@@ -442,45 +467,83 @@ function ConsultForm() {
           </div>
 
           <div className="col-span-12 lg:col-span-7">
-            <form
-              className="glass-card p-10 md:p-12 space-y-8 relative overflow-hidden rounded-sm"
-              onSubmit={(e) => e.preventDefault()}
-            >
-              <div
-                className="absolute -top-32 -right-32 w-96 h-96 rounded-full blur-3xl pointer-events-none"
-                style={{ background: "radial-gradient(closest-side, rgba(244,182,82,0.25), transparent)" }}
-              />
-              <div className="relative grid grid-cols-1 md:grid-cols-2 gap-8">
-                <Field label="Full Name" placeholder="Jane Doe" />
-                <Field label="Email Address" placeholder="jane@enterprise.com" type="email" />
-              </div>
-              <div className="relative grid grid-cols-1 md:grid-cols-2 gap-8">
-                <Field label="Birth Date" type="date" />
-                <Field label="Exact Birth Time" type="time" />
-              </div>
-              <div className="relative">
-                <Field label="Birth Location (City, Country)" placeholder="Mumbai, India" />
-              </div>
-              <div className="relative">
-                <label className="label-caps text-muted-foreground text-[10px]">Intention</label>
-                <textarea
-                  rows={3}
-                  placeholder="Describe the decision or season you are navigating…"
-                  className="mt-2 w-full bg-transparent border-b border-[var(--gold)]/30 focus:border-[var(--gold)] py-3 outline-none transition-colors text-foreground placeholder:text-muted-foreground/50 resize-none"
-                />
-              </div>
-              <button
-                type="submit"
-                className="btn-sweep relative w-full border border-[var(--gold)] text-[var(--gold)] hover:text-white py-5 label-caps transition-colors flex items-center justify-center gap-3 group"
-              >
-                Generate Strategic Blueprint
-                <Icon name="auto_awesome" filled className="text-base group-hover:rotate-12 transition-transform" />
-              </button>
-            </form>
+            <ConsultFormFields />
           </div>
         </div>
       </div>
     </section>
+  );
+}
+
+function ConsultFormFields() {
+  const submit = useServerFn(submitConsultation);
+  const [form, setForm] = useState({
+    full_name: "",
+    email: "",
+    dob: "",
+    birth_time: "",
+    birth_place: "",
+    question: "",
+  });
+  const [submitting, setSubmitting] = useState(false);
+  const set = (k: keyof typeof form) => (v: string) => setForm((f) => ({ ...f, [k]: v }));
+
+  const onSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (submitting) return;
+    setSubmitting(true);
+    try {
+      await submit({ data: form });
+      toast.success("Received. We'll be in touch within 48 hours.");
+      setForm({ full_name: "", email: "", dob: "", birth_time: "", birth_place: "", question: "" });
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Something went wrong.";
+      toast.error(msg);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <form
+      className="glass-card p-10 md:p-12 space-y-8 relative overflow-hidden rounded-sm"
+      onSubmit={onSubmit}
+    >
+      <div
+        className="absolute -top-32 -right-32 w-96 h-96 rounded-full blur-3xl pointer-events-none"
+        style={{ background: "radial-gradient(closest-side, rgba(244,182,82,0.25), transparent)" }}
+      />
+      <div className="relative grid grid-cols-1 md:grid-cols-2 gap-8">
+        <Field label="Full Name" placeholder="Jane Doe" value={form.full_name} onChange={set("full_name")} required />
+        <Field label="Email Address" placeholder="jane@enterprise.com" type="email" value={form.email} onChange={set("email")} required />
+      </div>
+      <div className="relative grid grid-cols-1 md:grid-cols-2 gap-8">
+        <Field label="Birth Date" type="date" value={form.dob} onChange={set("dob")} />
+        <Field label="Exact Birth Time" type="time" value={form.birth_time} onChange={set("birth_time")} />
+      </div>
+      <div className="relative">
+        <Field label="Birth Location (City, Country)" placeholder="Mumbai, India" value={form.birth_place} onChange={set("birth_place")} />
+      </div>
+      <div className="relative">
+        <label className="label-caps text-muted-foreground text-[10px]">Intention</label>
+        <textarea
+          rows={3}
+          required
+          value={form.question}
+          onChange={(e) => set("question")(e.target.value)}
+          placeholder="Describe the decision or season you are navigating…"
+          className="mt-2 w-full bg-transparent border-b border-[var(--gold)]/30 focus:border-[var(--gold)] py-3 outline-none transition-colors text-foreground placeholder:text-muted-foreground/50 resize-none"
+        />
+      </div>
+      <button
+        type="submit"
+        disabled={submitting}
+        className="btn-sweep relative w-full border border-[var(--gold)] text-[var(--gold)] hover:text-white py-5 label-caps transition-colors flex items-center justify-center gap-3 group disabled:opacity-60"
+      >
+        {submitting ? "Transmitting…" : "Generate Strategic Blueprint"}
+        <Icon name="auto_awesome" filled className="text-base group-hover:rotate-12 transition-transform" />
+      </button>
+    </form>
   );
 }
 
@@ -593,6 +656,7 @@ function Index() {
         <Method />
       </main>
       <Footer />
+      <Toaster />
     </div>
   );
 }
