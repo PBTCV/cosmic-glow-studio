@@ -41,8 +41,8 @@
   --color-offwhite: var(--offwhite);
   --color-ink-soft: var(--ink-soft);
 
-  --font-display: "EB Garamond", ui-serif, Georgia, serif;
-  --font-sans: "Hanken Grotesk", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Cormorant Garamond", ui-serif, Georgia, serif;
+  --font-sans: "Karla", ui-sans-serif, system-ui, sans-serif;
 }
 
 :root {
@@ -54,30 +54,9 @@
   --silver: #d3d3d3;
   --charcoal: #1a1a1a;
   --offwhite: #f8f8f8;
-  --ink-soft: #4a4a4a;
+  --ink-soft: #a8a8a8;
 
-  --background: var(--offwhite);
-  --foreground: var(--charcoal);
-  --card: #ffffff;
-  --card-foreground: var(--charcoal);
-  --popover: #ffffff;
-  --popover-foreground: var(--charcoal);
-  --primary: var(--charcoal);
-  --primary-foreground: var(--offwhite);
-  --secondary: var(--gold);
-  --secondary-foreground: var(--charcoal);
-  --muted: #efeeea;
-  --muted-foreground: var(--ink-soft);
-  --accent: var(--gold);
-  --accent-foreground: var(--charcoal);
-  --destructive: oklch(0.577 0.245 27.325);
-  --destructive-foreground: #ffffff;
-  --border: #e6e4df;
-  --input: #e6e4df;
-  --ring: var(--gold);
-}
-
-.dark {
+  /* Noir base */
   --background: var(--charcoal);
   --foreground: var(--offwhite);
   --card: #232323;
@@ -92,8 +71,10 @@
   --muted-foreground: var(--silver);
   --accent: var(--gold);
   --accent-foreground: var(--charcoal);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
+  --destructive: oklch(0.577 0.245 27.325);
+  --destructive-foreground: #ffffff;
+  --border: rgba(248, 248, 248, 0.10);
+  --input: rgba(248, 248, 248, 0.15);
   --ring: var(--gold);
 }
 
@@ -103,17 +84,21 @@
   }
   html {
     scroll-behavior: smooth;
+    background: var(--charcoal);
   }
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
+    font-weight: 300;
   }
   h1, h2, h3, h4 {
     font-family: var(--font-display);
-    letter-spacing: -0.01em;
+    letter-spacing: -0.015em;
+    font-weight: 300;
   }
+  ::selection { background: var(--gold); color: var(--charcoal); }
 }
 
 @utility font-display { font-family: var(--font-display); }
@@ -121,22 +106,22 @@
 
 @utility label-caps {
   font-family: var(--font-sans);
-  font-size: 12px;
-  font-weight: 600;
+  font-size: 11px;
+  font-weight: 500;
   line-height: 1.2;
-  letter-spacing: 0.18em;
+  letter-spacing: 0.28em;
   text-transform: uppercase;
 }
 
 @utility glass-card {
-  background: rgba(255, 255, 255, 0.72);
+  background: rgba(248, 248, 248, 0.03);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
-  border: 1px solid rgba(26, 26, 26, 0.08);
+  border: 1px solid rgba(248, 248, 248, 0.08);
 }
 
 @utility orbital-path {
-  border: 1px solid color-mix(in oklab, var(--gold) 35%, transparent);
+  border: 1px solid color-mix(in oklab, var(--gold) 18%, transparent);
   border-radius: 9999px;
   position: absolute;
   left: 50%;
@@ -147,13 +132,28 @@
 
 @utility gold-divider {
   width: 80px;
-  height: 2px;
-  background: linear-gradient(90deg, var(--gold), color-mix(in oklab, var(--gold) 20%, transparent));
+  height: 1px;
+  background: linear-gradient(90deg, var(--gold), color-mix(in oklab, var(--gold) 10%, transparent));
+}
+
+@utility hairline {
+  height: 1px;
+  background: color-mix(in oklab, var(--gold) 40%, transparent);
+}
+
+@utility reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 1s ease, transform 1s ease;
+}
+@utility reveal-in {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 @keyframes subtle-float {
   0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-10px); }
+  50% { transform: translateY(-12px); }
 }
 @keyframes orbit-spin {
   from { transform: translate(-50%, -50%) rotate(0deg); }
@@ -161,10 +161,51 @@
 }
 @keyframes gold-pulse {
   0%, 100% { box-shadow: 0 0 0 0 color-mix(in oklab, var(--gold) 40%, transparent); }
-  50% { box-shadow: 0 0 0 16px color-mix(in oklab, var(--gold) 0%, transparent); }
+  50% { box-shadow: 0 0 0 22px color-mix(in oklab, var(--gold) 0%, transparent); }
+}
+@keyframes sparkle-drift {
+  0% { transform: translateY(20px) scale(0.6); opacity: 0; }
+  50% { opacity: 1; }
+  100% { transform: translateY(-120px) scale(1); opacity: 0; }
+}
+@keyframes underline-draw {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
 }
 
-.animate-float { animation: subtle-float 6s ease-in-out infinite; }
+.animate-float { animation: subtle-float 7s ease-in-out infinite; }
 .animate-orbit-slow { animation: orbit-spin 60s linear infinite; }
-.animate-orbit-reverse { animation: orbit-spin 90s linear infinite reverse; }
-.animate-gold-pulse { animation: gold-pulse 2.6s ease-in-out infinite; }
+.animate-orbit-reverse { animation: orbit-spin 40s linear infinite reverse; }
+.animate-gold-pulse { animation: gold-pulse 3s ease-in-out infinite; }
+.animate-sparkle { animation: sparkle-drift 6s ease-in-out infinite; }
+
+/* Nav underline */
+.nav-link { position: relative; }
+.nav-link::after {
+  content: "";
+  position: absolute;
+  left: 0; right: 0; bottom: -6px;
+  height: 1px;
+  background: var(--gold);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.4s ease;
+}
+.nav-link:hover::after { transform: scaleX(1); }
+
+/* Gold sweep button */
+.btn-sweep {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+.btn-sweep::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--gold);
+  transform: translateY(101%);
+  transition: transform 0.5s cubic-bezier(.7,.0,.2,1);
+  z-index: -1;
+}
+.btn-sweep:hover::before { transform: translateY(0); }
