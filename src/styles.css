@@ -39,7 +39,10 @@
   --color-silver: var(--silver);
   --color-charcoal: var(--charcoal);
   --color-offwhite: var(--offwhite);
+  --color-ink: var(--ink);
   --color-ink-soft: var(--ink-soft);
+  --color-paper: var(--paper);
+  --color-cream: var(--cream);
 
   --font-display: "Cormorant Garamond", ui-serif, Georgia, serif;
   --font-sans: "Karla", ui-sans-serif, system-ui, sans-serif;
@@ -49,32 +52,36 @@
   --radius: 0.5rem;
 
   /* Brand palette */
-  --gold: #f4b652;
-  --gold-soft: #fbe0a8;
+  --gold: #c8973d;          /* deeper, more premium gold for light bg */
+  --gold-bright: #f4b652;
+  --gold-soft: #e8c989;
   --silver: #d3d3d3;
   --charcoal: #1a1a1a;
   --offwhite: #f8f8f8;
-  --ink-soft: #a8a8a8;
+  --ink: #1a1a1a;
+  --ink-soft: #5a5a5a;
+  --paper: #f4f0e8;          /* warm paper */
+  --cream: #faf6ee;
 
-  /* Noir base */
-  --background: var(--charcoal);
-  --foreground: var(--offwhite);
-  --card: #232323;
-  --card-foreground: var(--offwhite);
-  --popover: #232323;
-  --popover-foreground: var(--offwhite);
+  /* Light premium base */
+  --background: #f6f2ea;     /* warm off-white */
+  --foreground: #1a1a1a;
+  --card: #ffffff;
+  --card-foreground: #1a1a1a;
+  --popover: #ffffff;
+  --popover-foreground: #1a1a1a;
   --primary: var(--gold);
-  --primary-foreground: var(--charcoal);
-  --secondary: #2a2a2a;
-  --secondary-foreground: var(--offwhite);
-  --muted: #232323;
-  --muted-foreground: var(--silver);
+  --primary-foreground: #ffffff;
+  --secondary: #efeae0;
+  --secondary-foreground: #1a1a1a;
+  --muted: #ece6da;
+  --muted-foreground: #6b6357;
   --accent: var(--gold);
-  --accent-foreground: var(--charcoal);
+  --accent-foreground: #ffffff;
   --destructive: oklch(0.577 0.245 27.325);
   --destructive-foreground: #ffffff;
-  --border: rgba(248, 248, 248, 0.10);
-  --input: rgba(248, 248, 248, 0.15);
+  --border: rgba(26, 26, 26, 0.10);
+  --input: rgba(26, 26, 26, 0.14);
   --ring: var(--gold);
 }
 
@@ -84,21 +91,21 @@
   }
   html {
     scroll-behavior: smooth;
-    background: var(--charcoal);
+    background: var(--background);
   }
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
-    font-weight: 300;
+    font-weight: 400;
   }
   h1, h2, h3, h4 {
     font-family: var(--font-display);
     letter-spacing: -0.015em;
-    font-weight: 300;
+    font-weight: 400;
   }
-  ::selection { background: var(--gold); color: var(--charcoal); }
+  ::selection { background: var(--gold); color: #ffffff; }
 }
 
 @utility font-display { font-family: var(--font-display); }
@@ -107,21 +114,24 @@
 @utility label-caps {
   font-family: var(--font-sans);
   font-size: 11px;
-  font-weight: 500;
+  font-weight: 600;
   line-height: 1.2;
   letter-spacing: 0.28em;
   text-transform: uppercase;
 }
 
 @utility glass-card {
-  background: rgba(248, 248, 248, 0.03);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  border: 1px solid rgba(248, 248, 248, 0.08);
+  background: rgba(255, 255, 255, 0.65);
+  backdrop-filter: blur(18px) saturate(1.1);
+  -webkit-backdrop-filter: blur(18px) saturate(1.1);
+  border: 1px solid rgba(26, 26, 26, 0.06);
+  box-shadow:
+    0 40px 80px -40px rgba(26, 26, 26, 0.20),
+    0 1px 0 rgba(255, 255, 255, 0.6) inset;
 }
 
 @utility orbital-path {
-  border: 1px solid color-mix(in oklab, var(--gold) 18%, transparent);
+  border: 1px solid color-mix(in oklab, var(--gold) 28%, transparent);
   border-radius: 9999px;
   position: absolute;
   left: 50%;
@@ -138,7 +148,7 @@
 
 @utility hairline {
   height: 1px;
-  background: color-mix(in oklab, var(--gold) 40%, transparent);
+  background: color-mix(in oklab, var(--gold) 55%, transparent);
 }
 
 @utility reveal {
@@ -151,6 +161,13 @@
   transform: translateY(0);
 }
 
+@utility paper-vignette {
+  background:
+    radial-gradient(ellipse at 70% 30%, rgba(244, 182, 82, 0.10), transparent 55%),
+    radial-gradient(ellipse at 20% 80%, rgba(200, 151, 61, 0.06), transparent 50%),
+    var(--background);
+}
+
 @keyframes subtle-float {
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(-12px); }
@@ -160,7 +177,7 @@
   to { transform: translate(-50%, -50%) rotate(360deg); }
 }
 @keyframes gold-pulse {
-  0%, 100% { box-shadow: 0 0 0 0 color-mix(in oklab, var(--gold) 40%, transparent); }
+  0%, 100% { box-shadow: 0 0 0 0 color-mix(in oklab, var(--gold) 35%, transparent); }
   50% { box-shadow: 0 0 0 22px color-mix(in oklab, var(--gold) 0%, transparent); }
 }
 @keyframes sparkle-drift {
@@ -168,9 +185,9 @@
   50% { opacity: 1; }
   100% { transform: translateY(-120px) scale(1); opacity: 0; }
 }
-@keyframes underline-draw {
-  from { transform: scaleX(0); }
-  to { transform: scaleX(1); }
+@keyframes spin-slow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
 
 .animate-float { animation: subtle-float 7s ease-in-out infinite; }
@@ -178,6 +195,8 @@
 .animate-orbit-reverse { animation: orbit-spin 40s linear infinite reverse; }
 .animate-gold-pulse { animation: gold-pulse 3s ease-in-out infinite; }
 .animate-sparkle { animation: sparkle-drift 6s ease-in-out infinite; }
+.animate-spin-slow { animation: spin-slow 40s linear infinite; }
+.animate-spin-slower { animation: spin-slow 80s linear infinite reverse; }
 
 /* Nav underline */
 .nav-link { position: relative; }
