@@ -1,10 +1,10 @@
 import { createServerFn } from "@tanstack/react-start";
 import { getRequestHeader } from "@tanstack/react-start/server";
 import { z } from "zod";
+import { getAdminAccess } from "./admin.server";
 
 function requireAdmin(inputToken?: string) {
-  const expected = process.env.ADMIN_API_TOKEN;
-  if (!expected) throw new Error("ADMIN_API_TOKEN not configured");
+  const expected = getAdminAccess();
   const token = inputToken ?? getRequestHeader("x-admin-token");
   if (!token || token.length !== expected.length) throw new Error("Unauthorized");
   let diff = 0;

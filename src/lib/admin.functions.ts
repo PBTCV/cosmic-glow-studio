@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { getRequestIP } from "@tanstack/react-start/server";
 import { z } from "zod";
+import { getAdminAccess } from "./admin.server";
 
 const VerifySchema = z.object({
   token: z.string().min(1).max(512),
@@ -16,8 +17,7 @@ function timingSafeEqual(a: string, b: string): boolean {
 export const verifyAdminToken = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => VerifySchema.parse(input))
   .handler(async ({ data }) => {
-    const expected = process.env.ADMIN_API_TOKEN;
-    if (!expected) throw new Error("ADMIN_API_TOKEN not configured");
+    const expected = getAdminAccess();
 
     const { getSql, hashIp } = await import("./neon.server");
     const sql = getSql();

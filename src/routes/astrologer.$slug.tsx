@@ -1,6 +1,8 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { useSuspenseQuery, queryOptions } from "@tanstack/react-query";
+import { useState } from "react";
 import { getAstrologerBySlug } from "@/lib/astrologers.functions";
+import { BookConsultationDialog } from "@/components/astrologer/book-consultation-dialog";
 import logoAsset from "@/assets/pradeepji.svg";
 
 const profileQuery = (slug: string) =>
@@ -126,6 +128,14 @@ function AstrologerPage() {
   const services = (data.services ?? []) as Service[];
   const availability = (data.availability ?? []) as AvailabilitySlot[];
 
+  const [bookOpen, setBookOpen] = useState(false);
+  const [bookService, setBookService] = useState<string | undefined>();
+
+  function openBook(serviceName?: string) {
+    setBookService(serviceName);
+    setBookOpen(true);
+  }
+
   const name = displayName(p);
   const specialties = p.specialties ?? [];
   const languages = p.languages ?? [];
@@ -142,7 +152,16 @@ function AstrologerPage() {
 
   return (
     <div className="min-h-screen bg-[var(--background)] text-foreground">
-      <ProfileNav />
+      <ProfileNav onBook={() => openBook()} />
+
+      <BookConsultationDialog
+        open={bookOpen}
+        onOpenChange={setBookOpen}
+        astrologerName={name}
+        whatsapp={p.whatsapp}
+        phone={p.phone}
+        serviceName={bookService}
+      />
 
       {/* Hero */}
       <header className="relative pt-28 md:pt-32 pb-16 md:pb-24 overflow-hidden">
@@ -193,14 +212,9 @@ function AstrologerPage() {
               )}
 
               <div className="flex flex-wrap gap-3 pt-4">
-                <Link
-                  to="/"
-                  hash="consult"
-                  className="inline-flex items-center gap-3 bg-[var(--gold)] text-[var(--background)] px-7 py-3.5 label-caps hover:opacity-90 transition-opacity"
-                >
+                <BookButton onClick={() => openBook()} variant="primary">
                   Book consultation
-                  <Icon name="arrow_forward" className="text-base" />
-                </Link>
+                </BookButton>
                 {services.length > 0 && (
                   <a
                     href="#services"
@@ -333,7 +347,7 @@ function AstrologerPage() {
                 </p>
                 <div className="space-y-5">
                   {services.map((s, i) => (
-                    <ServiceRow key={s.id} service={s} index={i} />
+                    <ServiceRow key={s.id} service={s} index={i} onInquire={() => openBook(s.name)} />
                   ))}
                 </div>
               </section>
@@ -405,15 +419,9 @@ function AstrologerPage() {
                   )}
                 </ul>
 
-                <Link
-                  to="/"
-                  hash="consult"
-                  id="book"
-                  className="flex items-center justify-center gap-2 w-full bg-[var(--gold)] text-[var(--background)] py-3.5 label-caps hover:opacity-90 transition-opacity"
-                >
+                <BookButton onClick={() => openBook()} variant="primary" className="w-full" id="book">
                   Request consultation
-                  <Icon name="arrow_forward" className="text-base" />
-                </Link>
+                </BookButton>
               </div>
 
               {hasContact && (
@@ -459,16 +467,11 @@ function AstrologerPage() {
             Work with {p.full_name.split(" ")[0]} on your <span className="italic text-[var(--gold-bright)]">cosmic roadmap</span>
           </h2>
           <p className="text-[var(--silver)]/80 font-light max-w-lg mx-auto mb-10 leading-relaxed">
-            Submit an inquiry with your birth details and question. Our team will confirm availability and match you with the right session.
+            Share what you&apos;d like to explore. We&apos;ll open WhatsApp with your message ready to send to {p.full_name.split(" ")[0]}.
           </p>
-          <Link
-            to="/"
-            hash="consult"
-            className="inline-flex items-center gap-3 border border-[var(--gold-bright)] text-[var(--gold-bright)] px-10 py-4 label-caps hover:bg-[var(--gold-bright)] hover:text-[var(--charcoal)] transition-colors"
-          >
-            Start inquiry
-            <Icon name="arrow_forward" />
-          </Link>
+          <BookButton onClick={() => openBook()} variant="outline-light">
+            Message on WhatsApp
+          </BookButton>
         </div>
       </section>
 
@@ -489,7 +492,7 @@ function AstrologerPage() {
   );
 }
 
-function ProfileNav() {
+function ProfileNav({ onBook }: { onBook: () => void }) {
   return (
     <nav className="fixed top-0 inset-x-0 z-50 backdrop-blur-md bg-[var(--background)]/85 border-b border-[var(--gold)]/15">
       <div className="max-w-[1400px] mx-auto px-6 md:px-12 py-4 flex items-center justify-between">
@@ -498,14 +501,14 @@ function ProfileNav() {
             <img src={logoAsset} alt="Home" className="w-full h-full object-contain" />
           </span>
         </Link>
-        <Link
-          to="/"
-          hash="consult"
+        <button
+          type="button"
+          onClick={onBook}
           className="inline-flex items-center gap-2 border border-foreground/20 px-5 py-2.5 rounded-full label-caps text-sm hover:border-[var(--gold)] hover:text-[var(--gold)] transition-all group"
         >
           Book consult
           <Icon name="arrow_forward" className="text-base group-hover:translate-x-0.5 transition-transform" />
-        </Link>
+        </button>
       </div>
     </nav>
   );
@@ -556,7 +559,47 @@ function ContactChip({ href, icon, label, external }: { href: string; icon: stri
   );
 }
 
-function ServiceRow({ service: s, index }: { service: Service; index: number }) {
+function BookButton({
+  onClick,
+  children,
+  variant = "primary",
+  className = "",
+  id,
+}: {
+  onClick: () => void;
+  children: React.ReactNode;
+  variant?: "primary" | "outline" | "outline-light";
+  className?: string;
+  id?: string;
+}) {
+  const styles = {
+    primary: "bg-[var(--gold)] text-[var(--background)] hover:opacity-90",
+    outline: "border border-[var(--gold)]/50 text-[var(--gold)] hover:bg-[var(--gold)] hover:text-[var(--background)]",
+    "outline-light": "border border-[var(--gold-bright)] text-[var(--gold-bright)] hover:bg-[var(--gold-bright)] hover:text-[var(--charcoal)]",
+  }[variant];
+
+  return (
+    <button
+      type="button"
+      id={id}
+      onClick={onClick}
+      className={`inline-flex items-center justify-center gap-2 px-7 py-3.5 label-caps transition-colors ${styles} ${className}`}
+    >
+      {children}
+      <Icon name="arrow_forward" className="text-base" />
+    </button>
+  );
+}
+
+function ServiceRow({
+  service: s,
+  index,
+  onInquire,
+}: {
+  service: Service;
+  index: number;
+  onInquire: () => void;
+}) {
   return (
     <article className="group grid md:grid-cols-[auto,1fr,auto] gap-6 p-6 md:p-8 border border-[var(--gold)]/15 bg-card/40 rounded-sm hover:border-[var(--gold)]/40 hover:shadow-[0_12px_40px_-16px_rgba(200,151,61,0.25)] transition-all">
       <div className="hidden md:flex flex-col items-center justify-center w-14 shrink-0">
@@ -592,14 +635,14 @@ function ServiceRow({ service: s, index }: { service: Service; index: number }) 
         </div>
       </div>
       <div className="flex md:flex-col items-center justify-center md:justify-start gap-2">
-        <Link
-          to="/"
-          hash="consult"
+        <button
+          type="button"
+          onClick={onInquire}
           className="inline-flex items-center gap-2 whitespace-nowrap label-caps text-xs border border-[var(--gold)]/50 text-[var(--gold)] px-5 py-2.5 hover:bg-[var(--gold)] hover:text-[var(--background)] transition-colors w-full md:w-auto justify-center"
         >
-          Inquire
+          Book this
           <Icon name="arrow_forward" className="text-sm" />
-        </Link>
+        </button>
       </div>
     </article>
   );

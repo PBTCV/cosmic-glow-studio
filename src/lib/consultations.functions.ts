@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { getRequestHeader, getRequestIP } from "@tanstack/react-start/server";
 import { z } from "zod";
+import { getAdminAccess } from "./admin.server";
 
 const SubmitSchema = z.object({
   full_name: z.string().trim().min(2).max(120),
@@ -21,8 +22,7 @@ function nullify<T extends string | undefined>(v: T): string | null {
 }
 
 function requireAdmin(inputToken?: string) {
-  const expected = process.env.ADMIN_API_TOKEN;
-  if (!expected) throw new Error("ADMIN_API_TOKEN not configured");
+  const expected = getAdminAccess();
   const token = inputToken ?? getRequestHeader("x-admin-token");
   if (!token || token.length !== expected.length) throw new Error("Unauthorized");
   let diff = 0;

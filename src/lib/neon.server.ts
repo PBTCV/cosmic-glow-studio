@@ -1,4 +1,5 @@
 import { neon } from "@neondatabase/serverless";
+import { getAdminAccessSalt } from "./admin.server";
 
 let _sql: ReturnType<typeof neon> | null = null;
 
@@ -12,7 +13,7 @@ export function getSql() {
 
 export async function hashIp(ip: string | null | undefined): Promise<string | null> {
   if (!ip) return null;
-  const data = new TextEncoder().encode(ip + (process.env.ADMIN_API_TOKEN ?? "salt"));
+  const data = new TextEncoder().encode(ip + getAdminAccessSalt());
   const digest = await crypto.subtle.digest("SHA-256", data);
   return Array.from(new Uint8Array(digest))
     .slice(0, 12)

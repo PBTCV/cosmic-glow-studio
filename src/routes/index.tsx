@@ -9,6 +9,8 @@ import { submitConsultation } from "@/lib/consultations.functions";
 import { listAstrologersPublic } from "@/lib/astrologers.functions";
 import { Toaster } from "@/components/ui/sonner";
 
+const CHOOSE_ASTROLOGER = "#council";
+
 const astrologersQuery = queryOptions({
   queryKey: ["astrologers", "public"],
   queryFn: () => listAstrologersPublic(),
@@ -88,10 +90,10 @@ function Nav() {
           ))}
         </div>
         <a
-          href="#consult"
+          href={CHOOSE_ASTROLOGER}
           className="hidden md:inline-flex items-center gap-3 border border-foreground/20 px-6 py-3 rounded-full label-caps text-foreground hover:border-[var(--gold)] hover:text-[var(--gold)] transition-all group"
         >
-          Book Consult
+          Choose Astrologer
           <Icon name="arrow_forward" className="text-base group-hover:translate-x-1 transition-transform" />
         </a>
       </div>
@@ -210,10 +212,10 @@ function Hero() {
           </p>
           <div className="flex flex-col sm:flex-row gap-5 mt-2">
             <a
-              href="#consult"
+              href={CHOOSE_ASTROLOGER}
               className="btn-sweep inline-flex items-center justify-center gap-3 border border-[var(--gold)] text-[var(--gold)] hover:text-white px-8 py-4 label-caps transition-colors"
             >
-              Begin Your Audit
+              Choose Your Guide
               <Icon name="arrow_forward" className="text-base" />
             </a>
             <a
@@ -322,8 +324,9 @@ function Services() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-px bg-[var(--gold)]/15 border border-[var(--gold)]/15">
           {services.map((s, i) => (
-            <div
+            <a
               key={s.title}
+              href={CHOOSE_ASTROLOGER}
               className="group relative bg-card p-10 flex flex-col gap-6 min-h-[300px] transition-all duration-500 hover:bg-[var(--cream)]"
             >
               <div className="flex items-start justify-between">
@@ -333,10 +336,10 @@ function Services() {
               <h3 className="font-display text-3xl text-foreground leading-tight">{s.title}</h3>
               <p className="text-muted-foreground text-sm leading-relaxed flex-1 font-light">{s.body}</p>
               <div className="flex items-center gap-2 text-[var(--gold)] opacity-0 group-hover:opacity-100 transition-opacity">
-                <span className="label-caps text-[10px]">Inquire</span>
+                <span className="label-caps text-[10px]">Choose astrologer</span>
                 <Icon name="arrow_forward" className="text-base" />
               </div>
-            </div>
+            </a>
           ))}
         </div>
       </div>
@@ -368,13 +371,16 @@ function Council() {
   ];
 
   return (
-    <section id="council" className="py-32 border-t border-[var(--gold)]/15 bg-[var(--cream)]/40">
+    <section id="council" className="py-32 border-t border-[var(--gold)]/15 bg-[var(--cream)]/40 scroll-mt-24">
       <div ref={ref} className="reveal max-w-[1400px] mx-auto px-6 md:px-12">
         <div className="max-w-2xl mb-20">
-          <SectionLabel num="02" label="The Strategic Council" />
+          <SectionLabel num="02" label="Choose Your Guide" />
           <h2 className="font-display text-5xl md:text-6xl text-foreground leading-[0.95]">
             Counsel for those who <span className="italic text-[var(--gold)]">decide at scale.</span>
           </h2>
+          <p className="text-muted-foreground mt-6 font-light leading-relaxed">
+            Select an astrologer from our council to view their profile, services, and availability — then book your consultation.
+          </p>
         </div>
 
         {astrologers.length === 0 ? (
@@ -720,6 +726,7 @@ function Footer() {
               <li><a href="#services" className="hover:text-[var(--gold-bright)] transition">Services</a></li>
               <li><a href="#council" className="hover:text-[var(--gold-bright)] transition">Council</a></li>
               <li><a href="#method" className="hover:text-[var(--gold-bright)] transition">Method</a></li>
+              <li><a href={CHOOSE_ASTROLOGER} className="hover:text-[var(--gold-bright)] transition">Choose Astrologer</a></li>
               <li><a href="#consult" className="hover:text-[var(--gold-bright)] transition">Book a Consult</a></li>
             </ul>
           </div>
@@ -732,20 +739,11 @@ function Footer() {
             </ul>
           </div>
         </div>
-        <div className="border-t border-[var(--gold-bright)]/15 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
+        <div className="border-t border-[var(--gold-bright)]/15 pt-8 flex flex-col md:flex-row justify-center items-center gap-4">
           <p className="text-[var(--silver)]/50 text-sm font-light">
             © {new Date().getFullYear()} Pradeep Bhanot's The Cosmic Voice. All rights reserved.
           </p>
-          <div className="flex gap-3">
-            {["share", "mail", "language"].map((i) => (
-              <div
-                key={i}
-                className="w-10 h-10 rounded-full border border-[var(--silver)]/20 flex items-center justify-center hover:border-[var(--gold-bright)] hover:text-[var(--gold-bright)] text-[var(--silver)] transition cursor-pointer"
-              >
-                <Icon name={i} className="text-lg" />
-              </div>
-            ))}
-          </div>
+          
         </div>
       </div>
     </footer>
