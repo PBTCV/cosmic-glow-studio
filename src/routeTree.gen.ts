@@ -16,6 +16,7 @@ import { Route as AstrologerSlugRouteImport } from './routes/astrologer.$slug'
 import { Route as AdminAstrologersRouteImport } from './routes/admin.astrologers'
 import { Route as AdminAstrologersIndexRouteImport } from './routes/admin.astrologers.index'
 import { Route as ApiPublicConsultRouteImport } from './routes/api/public/consult'
+import { Route as ApiPublicAuditPreviewRouteImport } from './routes/api/public/audit-preview'
 import { Route as AdminAstrologersIdRouteImport } from './routes/admin.astrologers.$id'
 
 const AdminRoute = AdminRouteImport.update({
@@ -53,6 +54,11 @@ const ApiPublicConsultRoute = ApiPublicConsultRouteImport.update({
   path: '/api/public/consult',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicAuditPreviewRoute = ApiPublicAuditPreviewRouteImport.update({
+  id: '/api/public/audit-preview',
+  path: '/api/public/audit-preview',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminAstrologersIdRoute = AdminAstrologersIdRouteImport.update({
   id: '/$id',
   path: '/$id',
@@ -66,6 +72,7 @@ export interface FileRoutesByFullPath {
   '/astrologer/$slug': typeof AstrologerSlugRoute
   '/admin/': typeof AdminIndexRoute
   '/admin/astrologers/$id': typeof AdminAstrologersIdRoute
+  '/api/public/audit-preview': typeof ApiPublicAuditPreviewRoute
   '/api/public/consult': typeof ApiPublicConsultRoute
   '/admin/astrologers/': typeof AdminAstrologersIndexRoute
 }
@@ -74,6 +81,7 @@ export interface FileRoutesByTo {
   '/astrologer/$slug': typeof AstrologerSlugRoute
   '/admin': typeof AdminIndexRoute
   '/admin/astrologers/$id': typeof AdminAstrologersIdRoute
+  '/api/public/audit-preview': typeof ApiPublicAuditPreviewRoute
   '/api/public/consult': typeof ApiPublicConsultRoute
   '/admin/astrologers': typeof AdminAstrologersIndexRoute
 }
@@ -85,6 +93,7 @@ export interface FileRoutesById {
   '/astrologer/$slug': typeof AstrologerSlugRoute
   '/admin/': typeof AdminIndexRoute
   '/admin/astrologers/$id': typeof AdminAstrologersIdRoute
+  '/api/public/audit-preview': typeof ApiPublicAuditPreviewRoute
   '/api/public/consult': typeof ApiPublicConsultRoute
   '/admin/astrologers/': typeof AdminAstrologersIndexRoute
 }
@@ -97,6 +106,7 @@ export interface FileRouteTypes {
     | '/astrologer/$slug'
     | '/admin/'
     | '/admin/astrologers/$id'
+    | '/api/public/audit-preview'
     | '/api/public/consult'
     | '/admin/astrologers/'
   fileRoutesByTo: FileRoutesByTo
@@ -105,6 +115,7 @@ export interface FileRouteTypes {
     | '/astrologer/$slug'
     | '/admin'
     | '/admin/astrologers/$id'
+    | '/api/public/audit-preview'
     | '/api/public/consult'
     | '/admin/astrologers'
   id:
@@ -115,6 +126,7 @@ export interface FileRouteTypes {
     | '/astrologer/$slug'
     | '/admin/'
     | '/admin/astrologers/$id'
+    | '/api/public/audit-preview'
     | '/api/public/consult'
     | '/admin/astrologers/'
   fileRoutesById: FileRoutesById
@@ -123,6 +135,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRouteWithChildren
   AstrologerSlugRoute: typeof AstrologerSlugRoute
+  ApiPublicAuditPreviewRoute: typeof ApiPublicAuditPreviewRoute
   ApiPublicConsultRoute: typeof ApiPublicConsultRoute
 }
 
@@ -177,6 +190,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicConsultRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/audit-preview': {
+      id: '/api/public/audit-preview'
+      path: '/api/public/audit-preview'
+      fullPath: '/api/public/audit-preview'
+      preLoaderRoute: typeof ApiPublicAuditPreviewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/astrologers/$id': {
       id: '/admin/astrologers/$id'
       path: '/$id'
@@ -216,6 +236,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRouteWithChildren,
   AstrologerSlugRoute: AstrologerSlugRoute,
+  ApiPublicAuditPreviewRoute: ApiPublicAuditPreviewRoute,
   ApiPublicConsultRoute: ApiPublicConsultRoute,
 }
 export const routeTree = rootRouteImport

@@ -600,16 +600,46 @@ function ConsultFormFields() {
     question: "",
   });
   const [submitting, setSubmitting] = useState(false);
+  const [preview, setPreview] = useState("");
+  const [streaming, setStreaming] = useState(false);
   const set = (k: keyof typeof form) => (v: string) => setForm((f) => ({ ...f, [k]: v }));
+
+  const streamPreview = async (payload: typeof form) => {
+    setPreview("");
+    setStreaming(true);
+    try {
+      const res = await fetch("/api/public/audit-preview", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok || !res.body) {
+        const msg = await res.text().catch(() => "");
+        throw new Error(msg || "The Council is silent right now. Please try again.");
+      }
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      while (true) {
+        const { value, done } = await reader.read();
+        if (done) break;
+        setPreview((p) => p + decoder.decode(value, { stream: true }));
+      }
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Unable to reveal the glimpse.";
+      toast.error(msg);
+    } finally {
+      setStreaming(false);
+    }
+  };
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (submitting) return;
+    if (submitting || streaming) return;
     setSubmitting(true);
     try {
       await submit({ data: form });
       toast.success("Received. We'll be in touch within 48 hours.");
-      setForm({ full_name: "", email: "", dob: "", birth_time: "", birth_place: "", question: "" });
+      await streamPreview(form);
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Something went wrong.";
       toast.error(msg);
@@ -651,15 +681,43 @@ function ConsultFormFields() {
       </div>
       <button
         type="submit"
-        disabled={submitting}
+        disabled={submitting || streaming}
         className="btn-sweep relative w-full border border-[var(--gold)] text-[var(--gold)] hover:text-white py-5 label-caps transition-colors flex items-center justify-center gap-3 group disabled:opacity-60"
       >
-        {submitting ? "Transmitting…" : "Generate Strategic Blueprint"}
+        {submitting ? "Transmitting…" : streaming ? "The Council is speaking…" : "Generate Strategic Blueprint"}
         <Icon name="auto_awesome" filled className="text-base group-hover:rotate-12 transition-transform" />
       </button>
+
+      {(streaming || preview) && (
+        <div className="relative mt-4 border-t border-[var(--gold)]/20 pt-8">
+          <div className="flex items-center gap-3 mb-5">
+            <Icon name="auto_awesome" filled className="text-[var(--gold)] text-base" />
+            <span className="label-caps text-[10px] text-[var(--gold)]">
+              Live Glimpse — Powered by Lovable AI
+            </span>
+            {streaming && (
+              <span className="ml-auto text-[10px] text-muted-foreground animate-pulse">channeling…</span>
+            )}
+          </div>
+          <div className="font-light text-foreground/90 leading-relaxed whitespace-pre-wrap text-[15px]">
+            {preview}
+            {streaming && <span className="inline-block w-2 h-4 bg-[var(--gold)] ml-1 animate-pulse align-middle" />}
+          </div>
+          {!streaming && preview && (
+            <button
+              type="button"
+              onClick={() => streamPreview(form)}
+              className="mt-6 text-[var(--gold)] text-xs label-caps hover:underline"
+            >
+              Re-channel the glimpse
+            </button>
+          )}
+        </div>
+      )}
     </form>
   );
 }
+
 
 function Method() {
   const ref = useReveal<HTMLDivElement>();
