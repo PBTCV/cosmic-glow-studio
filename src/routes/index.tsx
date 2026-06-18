@@ -693,7 +693,7 @@ function ConsultFormFields() {
           <div className="flex items-center gap-3 mb-5">
             <Icon name="auto_awesome" filled className="text-[var(--gold)] text-base" />
             <span className="label-caps text-[10px] text-[var(--gold)]">
-              Live Glimpse — Powered by Lovable AI
+              LIVE GLIMPSE
             </span>
             {streaming && (
               <span className="ml-auto text-[10px] text-muted-foreground animate-pulse">channeling…</span>
