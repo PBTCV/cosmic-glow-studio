@@ -774,17 +774,12 @@ function ConsultFormFields() {
         disabled={submitting || streaming}
         className="btn-sweep relative w-full border border-[var(--gold)] text-[var(--gold)] hover:text-white py-5 label-caps transition-colors flex items-center justify-center gap-3 group disabled:opacity-60"
       >
-<<<<<<< HEAD:src/routes/index.tsx
         {submitting ? "Transmitting…" : streaming ? "The Council is speaking…" : "Generate Strategic Blueprint"}
-        <Icon name="auto_awesome" filled className="text-base group-hover:rotate-12 transition-transform" />
-=======
-        {submitting ? "Transmitting…" : "Generate Strategic Blueprint"}
         <Icon
           name="auto_awesome"
           filled
           className="text-base group-hover:rotate-12 transition-transform"
         />
->>>>>>> b56dad8 (Refactor project structure to integrate Next.js, including configuration updates, new API routes, and layout components. Removed Vite and related configurations, added necessary files for Next.js support, and updated package dependencies accordingly.):src/components/pages/home-page.tsx
       </button>
 
       {(streaming || preview) && (
