@@ -1,12 +1,14 @@
-import { Link, useRouterState } from "@tanstack/react-router";
-import { useServerFn } from "@tanstack/react-start";
+"use client";
+
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 import { toast } from "sonner";
 import { Toaster } from "@/components/ui/sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { verifyAdminToken } from "@/lib/admin.functions";
 import { clearAdminToken, getAdminToken, setAdminToken } from "@/lib/admin-token";
+import { apiPost } from "@/lib/next-api-client";
 
 type AdminContextValue = {
   token: string;
@@ -71,11 +73,15 @@ export function AdminShell({ children }: { children: ReactNode }) {
 }
 
 function AdminNav({ onLock }: { onLock: () => void }) {
-  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const pathname = usePathname();
 
   const tabs = [
-    { to: "/admin" as const, label: "Consultations", match: (p: string) => p === "/admin" || p === "/admin/" },
-    { to: "/admin/astrologers" as const, label: "Astrologers", match: (p: string) => p.startsWith("/admin/astrologers") },
+    { href: "/admin", label: "Consultations", match: (p: string) => p === "/admin" },
+    {
+      href: "/admin/astrologers",
+      label: "Astrologers",
+      match: (p: string) => p.startsWith("/admin/astrologers"),
+    },
   ];
 
   return (
@@ -89,8 +95,8 @@ function AdminNav({ onLock }: { onLock: () => void }) {
             const active = tab.match(pathname);
             return (
               <Link
-                key={tab.to}
-                to={tab.to}
+                key={tab.href}
+                href={tab.href}
                 className={`px-3 py-1.5 rounded-md text-sm transition-colors ${
                   active
                     ? "bg-[var(--gold)]/15 text-[var(--gold)] font-medium"
@@ -103,12 +109,12 @@ function AdminNav({ onLock }: { onLock: () => void }) {
           })}
         </nav>
         <div className="ml-auto flex items-center gap-2">
-          <a
+          <Link
             href="/"
             className="text-xs text-muted-foreground hover:text-[var(--gold)] transition-colors hidden sm:inline"
           >
             View site
-          </a>
+          </Link>
           <Button variant="outline" size="sm" onClick={onLock}>
             Lock
           </Button>
@@ -119,7 +125,6 @@ function AdminNav({ onLock }: { onLock: () => void }) {
 }
 
 function Unlock({ onSuccess }: { onSuccess: (token: string) => void }) {
-  const verify = useServerFn(verifyAdminToken);
   const [value, setValue] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -130,8 +135,8 @@ function Unlock({ onSuccess }: { onSuccess: (token: string) => void }) {
     setBusy(true);
     setError(null);
     try {
-      await verify({ data: { token: value } });
-      onSuccess(value);
+      await apiPost<{ ok: boolean }>("/api/admin/verify", { token: value.trim() });
+      onSuccess(value.trim());
       toast.success("Welcome back");
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Invalid password";
@@ -167,9 +172,7 @@ function Unlock({ onSuccess }: { onSuccess: (token: string) => void }) {
             }}
             className="h-11 bg-white/10 border-[var(--gold)]/30 text-white placeholder:text-white/50 caret-[var(--gold)]"
           />
-          {error && (
-            <p className="text-xs text-destructive">{error}</p>
-          )}
+          {error && <p className="text-xs text-destructive">{error}</p>}
         </div>
         <Button type="submit" disabled={busy || !value.trim()} className="w-full h-11">
           {busy ? "Verifying…" : "Unlock dashboard"}

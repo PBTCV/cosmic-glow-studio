@@ -2,11 +2,18 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
-  Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import {
-  buildConsultationMessage, buildWhatsAppUrl, getAstrologerWhatsAppNumber,
+  buildConsultationMessage,
+  buildWhatsAppUrl,
+  getAstrologerWhatsAppNumber,
 } from "@/lib/whatsapp";
 
 type BookConsultationDialogProps = {

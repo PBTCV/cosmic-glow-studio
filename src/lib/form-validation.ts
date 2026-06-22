@@ -98,7 +98,10 @@ export function validateProfileFields(profile: {
     errors.slug = "Use lowercase letters, numbers, and hyphens only";
   }
 
-  if (profile.years_experience != null && (profile.years_experience < 0 || profile.years_experience > 120)) {
+  if (
+    profile.years_experience != null &&
+    (profile.years_experience < 0 || profile.years_experience > 120)
+  ) {
     errors.years_experience = "Must be between 0 and 120";
   }
 

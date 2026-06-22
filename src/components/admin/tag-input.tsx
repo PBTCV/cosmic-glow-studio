@@ -41,7 +41,10 @@ export function TagInput({
   }
 
   function onPaste(text: string) {
-    const parts = text.split(/[,;\n]+/).map((p) => p.trim()).filter(Boolean);
+    const parts = text
+      .split(/[,;\n]+/)
+      .map((p) => p.trim())
+      .filter(Boolean);
     if (parts.length <= 1) return;
     const next = [...value];
     for (const part of parts) {
@@ -83,7 +86,9 @@ export function TagInput({
           value={draft}
           onChange={(e) => setDraft(e.target.value)}
           onKeyDown={onKeyDown}
-          onBlur={() => { if (draft.trim()) addTag(draft); }}
+          onBlur={() => {
+            if (draft.trim()) addTag(draft);
+          }}
           onPaste={(e) => {
             const text = e.clipboardData.getData("text");
             if (text.includes(",") || text.includes(";") || text.includes("\n")) {
@@ -99,7 +104,9 @@ export function TagInput({
       {error ? (
         <p className="text-xs text-destructive">{error}</p>
       ) : (
-        <p className="text-xs text-muted-foreground">Press Enter to add each item. Paste comma-separated lists too.</p>
+        <p className="text-xs text-muted-foreground">
+          Press Enter to add each item. Paste comma-separated lists too.
+        </p>
       )}
     </div>
   );
