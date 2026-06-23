@@ -1,11 +1,16 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useState } from "react";
+import { format } from "date-fns";
 import { toast } from "sonner";
-import { LOGO_SRC } from "@/lib/logo";
 import { useReveal } from "@/hooks/use-reveal";
 import { apiPost } from "@/lib/next-api-client";
+import { SiteFooter } from "@/components/site/site-footer";
+import { SiteNav } from "@/components/site/site-nav";
+import { urlFor } from "@/sanity/image";
+import type { PostListItem } from "@/sanity/types";
 
 const CHOOSE_ASTROLOGER = "#council";
 
@@ -42,47 +47,73 @@ const Icon = ({
   </span>
 );
 
-function NavLogo({ size = 40 }: { size?: number }) {
-  return (
-    <span
-      className="inline-flex items-center justify-center border border-[var(--gold)]/40 bg-[var(--charcoal)] overflow-hidden rounded-sm"
-      style={{ width: size, height: size }}
-    >
-      <img src={LOGO_SRC} alt="Pradeep Ji" className="w-full h-full object-contain" />
-    </span>
-  );
-}
+function InsightsPreview({ posts }: { posts: PostListItem[] }) {
+  if (!posts.length) return null;
 
-function Nav() {
   return (
-    <nav className="fixed top-0 inset-x-0 z-50 backdrop-blur-md bg-[var(--background)]/85 border-b border-[var(--gold)]/15">
-      <div className="max-w-[1400px] mx-auto px-6 md:px-12 py-5 flex items-center justify-between">
-        <a href="#top" className="flex items-center gap-3">
-          <NavLogo size={40} />
-        </a>
-        <div className="hidden md:flex items-center gap-10">
-          {["Insights", "Services", "Council", "Method"].map((l) => (
-            <a
-              key={l}
-              href={`#${l.toLowerCase()}`}
-              className="nav-link label-caps text-muted-foreground hover:text-[var(--gold)] transition-colors"
-            >
-              {l}
-            </a>
-          ))}
+    <section
+      id="insights"
+      className="py-24 md:py-32 px-6 md:px-12 border-t border-[var(--gold)]/10"
+    >
+      <div className="max-w-[1400px] mx-auto">
+        <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-12">
+          <div>
+            <p className="label-caps text-[var(--gold)] mb-3">Insights</p>
+            <h2 className="font-display text-4xl md:text-5xl leading-tight">
+              Fresh <span className="italic text-[var(--gold)]">perspectives</span>
+            </h2>
+          </div>
+          <Link
+            href="/insights"
+            className="inline-flex items-center gap-2 label-caps text-sm text-[var(--gold)] hover:gap-3 transition-all"
+          >
+            View all insights
+            <Icon name="arrow_forward" className="text-base" />
+          </Link>
         </div>
-        <a
-          href={CHOOSE_ASTROLOGER}
-          className="hidden md:inline-flex items-center gap-3 border border-foreground/20 px-6 py-3 rounded-full label-caps text-foreground hover:border-[var(--gold)] hover:text-[var(--gold)] transition-all group"
-        >
-          Choose Astrologer
-          <Icon
-            name="arrow_forward"
-            className="text-base group-hover:translate-x-1 transition-transform"
-          />
-        </a>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          {posts.map((post) => {
+            const imageUrl = post.coverImage
+              ? urlFor(post.coverImage)?.width(600).height(380).url()
+              : null;
+            return (
+              <Link
+                key={post._id}
+                href={`/insights/${post.slug}`}
+                className="group glass-card border border-[var(--gold)]/15 overflow-hidden hover:border-[var(--gold)]/40 transition-colors"
+              >
+                <div className="relative aspect-[16/10] bg-[var(--charcoal)]">
+                  {imageUrl ? (
+                    <Image
+                      src={imageUrl}
+                      alt={post.coverImage?.alt || post.title}
+                      fill
+                      className="object-cover group-hover:scale-[1.02] transition-transform duration-500"
+                      sizes="(max-width: 768px) 100vw, 400px"
+                    />
+                  ) : null}
+                </div>
+                <div className="p-6">
+                  {post.publishedAt ? (
+                    <time className="label-caps text-[9px] text-[var(--gold)]">
+                      {format(new Date(post.publishedAt), "MMM d, yyyy")}
+                    </time>
+                  ) : null}
+                  <h3 className="font-display text-xl mt-2 mb-2 group-hover:text-[var(--gold)] transition-colors">
+                    {post.title}
+                  </h3>
+                  {post.excerpt ? (
+                    <p className="text-sm text-muted-foreground font-light line-clamp-2">
+                      {post.excerpt}
+                    </p>
+                  ) : null}
+                </div>
+              </Link>
+            );
+          })}
+        </div>
       </div>
-    </nav>
+    </section>
   );
 }
 
@@ -774,7 +805,11 @@ function ConsultFormFields() {
         disabled={submitting || streaming}
         className="btn-sweep relative w-full border border-[var(--gold)] text-[var(--gold)] hover:text-white py-5 label-caps transition-colors flex items-center justify-center gap-3 group disabled:opacity-60"
       >
-        {submitting ? "Transmitting…" : streaming ? "The Council is speaking…" : "Generate Strategic Blueprint"}
+        {submitting
+          ? "Transmitting…"
+          : streaming
+            ? "The Council is speaking…"
+            : "Generate Strategic Blueprint"}
         <Icon
           name="auto_awesome"
           filled
@@ -786,16 +821,18 @@ function ConsultFormFields() {
         <div className="relative mt-4 border-t border-[var(--gold)]/20 pt-8">
           <div className="flex items-center gap-3 mb-5">
             <Icon name="auto_awesome" filled className="text-[var(--gold)] text-base" />
-            <span className="label-caps text-[10px] text-[var(--gold)]">
-              LIVE GLIMPSE
-            </span>
+            <span className="label-caps text-[10px] text-[var(--gold)]">LIVE GLIMPSE</span>
             {streaming && (
-              <span className="ml-auto text-[10px] text-muted-foreground animate-pulse">channeling…</span>
+              <span className="ml-auto text-[10px] text-muted-foreground animate-pulse">
+                channeling…
+              </span>
             )}
           </div>
           <div className="font-light text-foreground/90 leading-relaxed whitespace-pre-wrap text-[15px]">
             {preview}
-            {streaming && <span className="inline-block w-2 h-4 bg-[var(--gold)] ml-1 animate-pulse align-middle" />}
+            {streaming && (
+              <span className="inline-block w-2 h-4 bg-[var(--gold)] ml-1 animate-pulse align-middle" />
+            )}
           </div>
           {!streaming && preview && (
             <button
@@ -811,7 +848,6 @@ function ConsultFormFields() {
     </form>
   );
 }
-
 
 function Method() {
   const ref = useReveal<HTMLDivElement>();
@@ -866,86 +902,25 @@ function Method() {
   );
 }
 
-function Footer() {
-  return (
-    <footer className="pt-24 pb-10 px-6 md:px-12 bg-[var(--charcoal)] text-[var(--offwhite)]">
-      <div className="max-w-[1400px] mx-auto">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
-          <div className="md:col-span-2">
-            <div className="flex items-center gap-3 mb-5">
-              <NavLogo size={40} />
-              <span className="font-display text-xl md:text-2xl text-[var(--offwhite)] leading-tight">
-                Pradeep Bhanot&apos;s{" "}
-                <span className="italic text-[var(--gold-bright)]">The Cosmic Voice</span>
-              </span>
-            </div>
-            <p className="text-[var(--silver)]/80 max-w-md leading-relaxed font-light">
-              Ancient wisdom. Modern strategy. Cosmic clarity for the executives, founders, and
-              institutions shaping what comes next.
-            </p>
-          </div>
-          <div>
-            <p className="label-caps text-[var(--gold-bright)] mb-5">Practice</p>
-            <ul className="space-y-3 text-[var(--silver)]/80 font-light">
-              <li>
-                <a href="#services" className="hover:text-[var(--gold-bright)] transition">
-                  Services
-                </a>
-              </li>
-              <li>
-                <a href="#council" className="hover:text-[var(--gold-bright)] transition">
-                  Council
-                </a>
-              </li>
-              <li>
-                <a href="#method" className="hover:text-[var(--gold-bright)] transition">
-                  Method
-                </a>
-              </li>
-              <li>
-                <a href={CHOOSE_ASTROLOGER} className="hover:text-[var(--gold-bright)] transition">
-                  Choose Astrologer
-                </a>
-              </li>
-              <li>
-                <a href="#consult" className="hover:text-[var(--gold-bright)] transition">
-                  Book a Consult
-                </a>
-              </li>
-            </ul>
-          </div>
-          <div>
-            <p className="label-caps text-[var(--gold-bright)] mb-5">Contact</p>
-            <ul className="space-y-3 text-[var(--silver)]/80 font-light">
-              <li>Pradeepbhanot@gmail.com</li>
-              <li>+91 78889 33521</li>
-              <li> Panchkula, Haryana, India</li>
-            </ul>
-          </div>
-        </div>
-        <div className="border-t border-[var(--gold-bright)]/15 pt-8 flex flex-col md:flex-row justify-center items-center gap-4">
-          <p className="text-[var(--silver)]/50 text-sm font-light">
-            © {new Date().getFullYear()} Pradeep Bhanot's The Cosmic Voice. All rights reserved.
-          </p>
-        </div>
-      </div>
-    </footer>
-  );
-}
-
-export function HomePage({ astrologers }: { astrologers: CouncilAstrologer[] }) {
+export function HomePage({
+  astrologers,
+  latestPosts = [],
+}: {
+  astrologers: CouncilAstrologer[];
+  latestPosts?: PostListItem[];
+}) {
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <Nav />
+      <SiteNav variant="home" />
       <main>
         <Hero />
-        {/* <TrustBar /> */}
+        <InsightsPreview posts={latestPosts} />
         <Services />
         <Council astrologers={astrologers} />
         <ConsultForm />
         <Method />
       </main>
-      <Footer />
+      <SiteFooter />
     </div>
   );
 }

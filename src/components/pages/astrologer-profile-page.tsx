@@ -552,17 +552,25 @@ function ProfileNav({ onBook }: { onBook: () => void }) {
             <img src={LOGO_SRC} alt="Home" className="w-full h-full object-contain" />
           </span>
         </Link>
-        <button
-          type="button"
-          onClick={onBook}
-          className="inline-flex items-center gap-2 border border-foreground/20 px-5 py-2.5 rounded-full label-caps text-sm hover:border-[var(--gold)] hover:text-[var(--gold)] transition-all group"
-        >
-          Book consult
-          <Icon
-            name="arrow_forward"
-            className="text-base group-hover:translate-x-0.5 transition-transform"
-          />
-        </button>
+        <div className="flex items-center gap-6">
+          <Link
+            href="/insights"
+            className="hidden sm:inline label-caps text-sm text-muted-foreground hover:text-[var(--gold)] transition-colors"
+          >
+            Insights
+          </Link>
+          <button
+            type="button"
+            onClick={onBook}
+            className="inline-flex items-center gap-2 border border-foreground/20 px-5 py-2.5 rounded-full label-caps text-sm hover:border-[var(--gold)] hover:text-[var(--gold)] transition-all group"
+          >
+            Book consult
+            <Icon
+              name="arrow_forward"
+              className="text-base group-hover:translate-x-0.5 transition-transform"
+            />
+          </button>
+        </div>
       </div>
     </nav>
   );

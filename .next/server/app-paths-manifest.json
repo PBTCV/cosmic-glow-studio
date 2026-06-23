@@ -1,4 +1,10 @@
 {
+  "/api/consultations/list/route": "app/api/consultations/list/route.js",
+  "/_not-found/page": "app/_not-found/page.js",
+  "/insights/page": "app/insights/page.js",
   "/page": "app/page.js",
-  "/astrologer/[slug]/page": "app/astrologer/[slug]/page.js"
+  "/insights/[slug]/page": "app/insights/[slug]/page.js",
+  "/admin/page": "app/admin/page.js",
+  "/studio/[[...tool]]/page": "app/studio/[[...tool]]/page.js",
+  "/admin/astrologers/page": "app/admin/astrologers/page.js"
 }

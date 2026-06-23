@@ -1,5 +1,6 @@
 import { getSql } from "@/lib/neon.server";
 import { HomePage } from "@/components/pages/home-page";
+import { getLatestPosts } from "@/sanity/queries";
 
 export const dynamic = "force-dynamic";
 
@@ -30,5 +31,7 @@ export default async function Page() {
     order by display_order asc, created_at desc
   `) as CouncilAstrologer[];
 
-  return <HomePage astrologers={astrologers} />;
+  const latestPosts = await getLatestPosts(3);
+
+  return <HomePage astrologers={astrologers} latestPosts={latestPosts} />;
 }
