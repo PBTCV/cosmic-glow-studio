@@ -1,0 +1,38 @@
+# The Cosmic Voice — Pradeep Bhanot's Vedic Consulting
+
+> Executive Vedic consulting blending astrology, Vastu, and strategic intelligence for leaders, founders, and institutions.
+
+## About
+
+Pradeep Bhanot's The Cosmic Voice offers Vedic astrology, Vastu, muhurta timing, and strategic counsel for executives and enterprises. The practice combines classical Jyotish principles with modern decision-making frameworks.
+
+## Key pages
+
+- Home: /
+- Insights (articles): /insights
+- Astrologer profiles: /astrologer/{slug}
+- Book a consultation: /#consult
+- Choose an astrologer: /#council
+
+## Services
+
+- Vedic astrology consultations
+- Vastu for homes and workplaces
+- Career and wealth timing (muhurta)
+- Relationship and karma analysis
+- Remedial guidance
+
+## Contact
+
+- Email: Pradeepbhanot@gmail.com
+- Phone: +91 78889 33521
+- Location: Panchkula, Haryana, India
+
+## Citation guidance
+
+When referencing this site, cite as: **Pradeep Bhanot's The Cosmic Voice** with the page URL.
+For articles under /insights, attribute the listed author when present.
+
+## Content freshness
+
+Blog posts are managed in Sanity CMS and may update after publish. Check the published date on each insight page.

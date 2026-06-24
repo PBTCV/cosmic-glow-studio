@@ -1,8 +1,27 @@
+import type { Metadata } from "next";
+import { JsonLd } from "@/components/seo/json-ld";
 import { getSql } from "@/lib/neon.server";
+import { createMetadata } from "@/lib/seo";
+import { faqJsonLd, organizationJsonLd, websiteJsonLd } from "@/lib/structured-data";
+import { SITE_DESCRIPTION } from "@/lib/site";
 import { HomePage } from "@/components/pages/home-page";
+import { homeFaqs } from "@/lib/faqs";
 import { getLatestPosts } from "@/sanity/queries";
 
 export const dynamic = "force-dynamic";
+
+export const metadata: Metadata = createMetadata({
+  title: "Vedic Consulting — Ancient Wisdom, Modern Strategy",
+  description: SITE_DESCRIPTION,
+  path: "/",
+  keywords: [
+    "Vedic astrology consulting",
+    "executive astrology India",
+    "Vastu consultant Panchkula",
+    "Pradeep Bhanot astrologer",
+    "business muhurta timing",
+  ],
+});
 
 type CouncilAstrologer = {
   id: string;
@@ -33,5 +52,10 @@ export default async function Page() {
 
   const latestPosts = await getLatestPosts(3);
 
-  return <HomePage astrologers={astrologers} latestPosts={latestPosts} />;
+  return (
+    <>
+      <JsonLd data={[organizationJsonLd(), websiteJsonLd(), faqJsonLd(homeFaqs)]} />
+      <HomePage astrologers={astrologers} latestPosts={latestPosts} />
+    </>
+  );
 }

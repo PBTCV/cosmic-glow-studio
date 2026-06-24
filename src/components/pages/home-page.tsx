@@ -7,6 +7,7 @@ import { format } from "date-fns";
 import { toast } from "sonner";
 import { useReveal } from "@/hooks/use-reveal";
 import { apiPost } from "@/lib/next-api-client";
+import { homeFaqs } from "@/lib/faqs";
 import { SiteFooter } from "@/components/site/site-footer";
 import { SiteNav } from "@/components/site/site-nav";
 import { urlFor } from "@/sanity/image";
@@ -902,6 +903,30 @@ function Method() {
   );
 }
 
+function HomeFaq() {
+  return (
+    <section id="faq" className="py-24 md:py-32 px-6 md:px-12 border-t border-[var(--gold)]/10">
+      <div className="max-w-[900px] mx-auto">
+        <p className="label-caps text-[var(--gold)] mb-3">FAQ</p>
+        <h2 className="font-display text-4xl md:text-5xl leading-tight mb-10">
+          Common <span className="italic text-[var(--gold)]">questions</span>
+        </h2>
+        <div className="space-y-6">
+          {homeFaqs.map((item) => (
+            <article
+              key={item.question}
+              className="border border-[var(--gold)]/15 p-6 md:p-8 glass-card"
+            >
+              <h3 className="font-display text-xl md:text-2xl mb-3">{item.question}</h3>
+              <p className="text-muted-foreground font-light leading-relaxed">{item.answer}</p>
+            </article>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 export function HomePage({
   astrologers,
   latestPosts = [],
@@ -919,6 +944,7 @@ export function HomePage({
         <Council astrologers={astrologers} />
         <ConsultForm />
         <Method />
+        <HomeFaq />
       </main>
       <SiteFooter />
     </div>
