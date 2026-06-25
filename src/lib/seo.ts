@@ -89,7 +89,6 @@ export const rootMetadata: Metadata = {
     "business astrology",
     "Pradeep Bhanot",
     "The Cosmic Voice",
-    "muhurta",
     "corporate Vedic consulting",
   ],
   openGraph: {

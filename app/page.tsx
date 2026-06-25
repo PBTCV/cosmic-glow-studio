@@ -19,7 +19,6 @@ export const metadata: Metadata = createMetadata({
     "executive astrology India",
     "Vastu consultant Panchkula",
     "Pradeep Bhanot astrologer",
-    "business muhurta timing",
   ],
 });
 

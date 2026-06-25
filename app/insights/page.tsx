@@ -8,12 +8,11 @@ import { getPosts } from "@/sanity/queries";
 export const metadata: Metadata = createMetadata({
   title: "Insights",
   description:
-    "Essays on Vedic strategy, timing, muhurta, and cosmic clarity for executives, founders, and institutions.",
+    "Essays on Vedic strategy and cosmic clarity for executives, founders, and institutions.",
   path: "/insights",
   keywords: [
     "Vedic astrology insights",
     "business astrology articles",
-    "muhurta timing",
     "Vastu guidance",
     "cosmic strategy",
   ],

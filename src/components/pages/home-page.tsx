@@ -124,7 +124,7 @@ const orbitalNodes = [
   { label: "Career", icon: "work_history", pos: "top-[6%] right-[12%]" },
   { label: "Wealth", icon: "diamond", pos: "top-[46%] right-[-2%]" },
   { label: "Relations", icon: "favorite", pos: "bottom-[12%] right-[14%]" },
-  { label: "Muhurta", icon: "schedule", pos: "bottom-[0%] left-1/2 -translate-x-1/2" },
+  { label: "Strategy", icon: "strategy", pos: "bottom-[0%] left-1/2 -translate-x-1/2" },
   { label: "Remedies", icon: "spa", pos: "bottom-[12%] left-[14%]" },
   { label: "Karma", icon: "all_inclusive", pos: "top-[46%] left-[-2%]" },
 ];
@@ -379,9 +379,9 @@ const services = [
     body: "Bespoke integration of Vedic wisdom for modern technology scaling and capital strategy.",
   },
   {
-    icon: "schedule",
-    title: "Muhurta — Auspicious Timing",
-    body: "Precision timing for signings, launches, and announcements to maximize cosmic momentum.",
+    icon: "leaderboard",
+    title: "Strategic Clarity Sessions",
+    body: "Executive counsel for high-stakes pivots, partnerships, and portfolio decisions — grounded in chart intelligence and practical judgment.",
   },
 ];
 
@@ -394,14 +394,14 @@ function Services() {
           <div className="col-span-12 lg:col-span-5">
             <SectionLabel num="01" label="Integrated Wisdom Streams" />
             <h2 className="font-display text-5xl md:text-6xl text-foreground leading-[0.95]">
-              Four pillars. <br />
+              Six disciplines. <br />
               <span className="italic text-[var(--gold)]">One framework.</span>
             </h2>
           </div>
           <div className="col-span-12 lg:col-span-6 lg:col-start-7 flex items-end">
             <p className="text-muted-foreground leading-relaxed text-lg font-light">
-              Each engagement weaves astrology, Vastu, timing, and strategy into a single operating
-              system — calibrated for leaders who treat clarity as capital.
+              Each engagement weaves astrology, Vastu, and strategy into a single operating system —
+              calibrated for leaders who treat clarity as capital.
             </p>
           </div>
         </div>
@@ -667,7 +667,7 @@ function ConsultForm() {
                 "Personalized Transit Mapping",
                 "Core Elemental Balance",
                 "Strategic Decision Windows",
-                "Auspicious Timing Brief",
+                "Executive Alignment Brief",
               ].map((b, i) => (
                 <li
                   key={b}
@@ -866,7 +866,7 @@ function Method() {
     {
       n: "III",
       t: "Implement",
-      body: "You receive a sequenced playbook — decisions, timings, and remedies — ready for executive action.",
+      body: "You receive a sequenced playbook — decisions and strategic priorities — ready for executive action.",
     },
   ];
   return (

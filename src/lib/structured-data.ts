@@ -122,7 +122,7 @@ export function personJsonLd({
     description,
     url: absoluteUrl(`/astrologer/${slug}`),
     image: imageUrl || absoluteUrl("/pradeepji.svg"),
-    knowsAbout: specialties?.length ? specialties : ["Vedic astrology", "Vastu", "Muhurta"],
+    knowsAbout: specialties?.length ? specialties : ["Vedic astrology", "Vastu"],
     worksFor: {
       "@type": "Organization",
       name: SITE_NAME,

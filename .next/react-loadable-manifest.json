@@ -1,140 +1,56 @@
 {
   "node_modules/@sanity/client/dist/index.browser.js -> ./_chunks-es/stegaEncodeSourceMap.js": {
-    "id": 71214,
+    "id": "node_modules/@sanity/client/dist/index.browser.js -> ./_chunks-es/stegaEncodeSourceMap.js",
     "files": [
-      "static/chunks/1214.237be111ef8d4b40.js"
+      "static/chunks/_app-pages-browser_node_modules_sanity_client_dist__chunks-es_stegaEncodeSourceMap_js.js"
     ]
   },
   "node_modules/@sanity/client/dist/index.browser.js -> @sanity/eventsource": {
-    "id": 88679,
+    "id": "node_modules/@sanity/client/dist/index.browser.js -> @sanity/eventsource",
     "files": [
-      "static/chunks/8679.859e8e64623e8300.js"
+      "static/chunks/_app-pages-browser_node_modules_sanity_eventsource_browser_js.js"
     ]
   },
   "node_modules/@sanity/next-loader/dist/client-components/live-stream.js -> ../_chunks-es/SanityLiveStream.js": {
-    "id": 64742,
+    "id": "node_modules/@sanity/next-loader/dist/client-components/live-stream.js -> ../_chunks-es/SanityLiveStream.js",
     "files": [
-      "static/chunks/4742.e69ea758c3fabbdd.js"
+      "static/chunks/_app-pages-browser_node_modules_sanity_next-loader_dist__chunks-es_SanityLiveStream_js.js"
     ]
   },
   "node_modules/@sanity/next-loader/dist/client-components/live.js -> ../_chunks-es/PresentationComlink.js": {
-    "id": 68940,
+    "id": "node_modules/@sanity/next-loader/dist/client-components/live.js -> ../_chunks-es/PresentationComlink.js",
     "files": [
-      "static/chunks/8940.d9104061ea5cb5e8.js"
+      "static/chunks/_app-pages-browser_node_modules_sanity_next-loader_dist__chunks-es_PresentationComlink_js.js"
     ]
   },
   "node_modules/@sanity/next-loader/dist/client-components/live.js -> ../_chunks-es/RefreshOnFocus.js": {
-    "id": 91539,
+    "id": "node_modules/@sanity/next-loader/dist/client-components/live.js -> ../_chunks-es/RefreshOnFocus.js",
     "files": [
-      "static/chunks/1539.f0916b46b0a9a217.js"
+      "static/chunks/_app-pages-browser_node_modules_sanity_next-loader_dist__chunks-es_RefreshOnFocus_js.js"
     ]
   },
   "node_modules/@sanity/next-loader/dist/client-components/live.js -> ../_chunks-es/RefreshOnMount.js": {
-    "id": 91598,
+    "id": "node_modules/@sanity/next-loader/dist/client-components/live.js -> ../_chunks-es/RefreshOnMount.js",
     "files": [
-      "static/chunks/1598.b8d206aa0b26471c.js"
+      "static/chunks/_app-pages-browser_node_modules_sanity_next-loader_dist__chunks-es_RefreshOnMount_js.js"
     ]
   },
   "node_modules/@sanity/next-loader/dist/client-components/live.js -> ../_chunks-es/RefreshOnReconnect.js": {
-    "id": 17234,
+    "id": "node_modules/@sanity/next-loader/dist/client-components/live.js -> ../_chunks-es/RefreshOnReconnect.js",
     "files": [
-      "static/chunks/7234.56f897d947a814b9.js"
+      "static/chunks/_app-pages-browser_node_modules_sanity_next-loader_dist__chunks-es_RefreshOnReconnect_js.js"
     ]
   },
   "node_modules/@sanity/ui/dist/_chunks-es/_visual-editing.mjs -> ./refractor.mjs": {
-    "id": 51931,
+    "id": "node_modules/@sanity/ui/dist/_chunks-es/_visual-editing.mjs -> ./refractor.mjs",
     "files": [
-      "static/chunks/9849-1a8dfb0498201939.js",
-      "static/chunks/4312.213a975e22a29c36.js"
-    ]
-  },
-  "node_modules/next-sanity/dist/studio/client-component.js -> ../_chunks-es/NextStudio.js": {
-    "id": 5350,
-    "files": [
-      "static/chunks/5350.f4a1a591477aa6e6.js"
+      "static/chunks/_app-pages-browser_node_modules_sanity_ui_dist__chunks-es_refractor_mjs.js"
     ]
   },
   "node_modules/next-sanity/dist/visual-editing/client-component.js -> ../_chunks-es/VisualEditing.js": {
-    "id": 22688,
+    "id": "node_modules/next-sanity/dist/visual-editing/client-component.js -> ../_chunks-es/VisualEditing.js",
     "files": [
-      "static/chunks/c0e7568e-0d89dce170fd06f1.js",
-      "static/chunks/3204862b-c7e4215f97bbdf45.js",
-      "static/chunks/06f0e697.ae08628609abea7e.js",
-      "static/chunks/8334-0f4da46e83974a80.js",
-      "static/chunks/6407-cfad03ca7b9b53ac.js",
-      "static/chunks/2688.22431f029ee3d37d.js",
-      "static/chunks/3767.5a1cddf89d893bc5.js"
-    ]
-  },
-  "node_modules/sanity/lib/_chunks-es/StructureToolProvider.mjs -> ./resources6.mjs": {
-    "id": 63914,
-    "files": [
-      "static/chunks/3914.343ff1cfe68552c0.js"
-    ]
-  },
-  "node_modules/sanity/lib/_chunks-es/index3.mjs -> ./index.mjs": {
-    "id": 86205,
-    "files": [
-      "static/chunks/6205.0696cb9a57b8f516.js"
-    ]
-  },
-  "node_modules/sanity/lib/_chunks-es/index3.mjs -> ./index2.mjs": {
-    "id": 31515,
-    "files": [
-      "static/chunks/1515.47a683ca2e3a4ec9.js"
-    ]
-  },
-  "node_modules/sanity/lib/_chunks-es/index3.mjs -> ./pane.mjs": {
-    "id": 7331,
-    "files": []
-  },
-  "node_modules/sanity/lib/_chunks-es/pane.mjs -> ./index3.mjs": {
-    "id": 65524,
-    "files": [
-      "static/chunks/5524.35e0241c290e475f.js"
-    ]
-  },
-  "node_modules/sanity/lib/index.mjs -> ./_chunks-es/VideoPlayer.mjs": {
-    "id": 23933,
-    "files": [
-      "static/chunks/a4634e51.edf4b6aa18a2949b.js",
-      "static/chunks/3933.0309180584b8a055.js"
-    ]
-  },
-  "node_modules/sanity/lib/index.mjs -> ./_chunks-es/ViteDevServerStopped.mjs": {
-    "id": 7348,
-    "files": [
-      "static/chunks/7348.faa5a87cda82824c.js"
-    ]
-  },
-  "node_modules/sanity/lib/index.mjs -> ./_chunks-es/resources.mjs": {
-    "id": 68758,
-    "files": [
-      "static/chunks/8758.b6f954bd0fa50a6f.js"
-    ]
-  },
-  "node_modules/sanity/lib/index.mjs -> ./_chunks-es/resources2.mjs": {
-    "id": 48286,
-    "files": [
-      "static/chunks/8286.6fa1d1478ead991d.js"
-    ]
-  },
-  "node_modules/sanity/lib/index.mjs -> ./_chunks-es/resources3.mjs": {
-    "id": 87159,
-    "files": [
-      "static/chunks/7159.51285cdc44c8a845.js"
-    ]
-  },
-  "node_modules/sanity/lib/index.mjs -> ./_chunks-es/resources4.mjs": {
-    "id": 70064,
-    "files": [
-      "static/chunks/64.ccfb4427c37ae48c.js"
-    ]
-  },
-  "node_modules/sanity/lib/index.mjs -> ./_chunks-es/resources5.mjs": {
-    "id": 91745,
-    "files": [
-      "static/chunks/1745.a9388571d14fce17.js"
+      "static/chunks/_app-pages-browser_node_modules_next-sanity_dist__chunks-es_VisualEditing_js.js"
     ]
   }
 }

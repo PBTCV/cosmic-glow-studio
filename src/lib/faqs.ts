@@ -2,7 +2,7 @@ export const homeFaqs = [
   {
     question: "What is The Cosmic Voice?",
     answer:
-      "The Cosmic Voice is Pradeep Bhanot's executive Vedic consulting practice offering astrology, Vastu, muhurta timing, and strategic guidance for leaders and institutions.",
+      "The Cosmic Voice is Pradeep Bhanot's executive Vedic consulting practice offering astrology, Vastu, and strategic guidance for leaders and institutions.",
   },
   {
     question: "Who should book a Vedic consultation?",
@@ -12,7 +12,7 @@ export const homeFaqs = [
   {
     question: "What services are offered?",
     answer:
-      "Services include Vedic astrology readings, Vastu assessments, muhurta selection, remedial guidance, and ongoing strategic counsel through the practice's council of astrologers.",
+      "Services include Vedic astrology readings, Vastu assessments, and ongoing strategic counsel through the practice's council of astrologers.",
   },
   {
     question: "How do I choose an astrologer?",
